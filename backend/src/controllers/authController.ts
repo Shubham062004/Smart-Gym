@@ -1,6 +1,9 @@
-const User = require('../models/User');
-const generateToken = require('../utils/generateToken');
-const Joi = require('joi');
+import { Request, Response, NextFunction } from 'express';
+import User from '../models/User';
+import generateToken from '../utils/generateToken';
+import Joi from 'joi';
+import sendEmail from '../utils/sendEmail';
+import { AuthRequest } from '../middleware/authMiddleware';
 
 // Joi Schemas for Validation
 const signupSchema = Joi.object({
@@ -18,23 +21,22 @@ const forgotPasswordSchema = Joi.object({
     email: Joi.string().email().required()
 });
 
-// @desc    Register a new user
-// @route   POST /auth/signup
-// @access  Public
-const signup = async (req, res, next) => {
+export const signup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { error } = signupSchema.validate(req.body);
-        if (error) return res.status(400).json({ message: error.details[0].message });
+        if (error) {
+            res.status(400).json({ message: error.details[0].message });
+            return;
+        }
 
         const { name, email, password } = req.body;
 
-        // Check if user exists
         const userExists = await User.findOne({ email });
         if (userExists) {
-            return res.status(400).json({ message: 'User already exists' });
+            res.status(400).json({ message: 'User already exists' });
+            return;
         }
 
-        // Create user
         const user = await User.create({
             name,
             email,
@@ -48,27 +50,26 @@ const signup = async (req, res, next) => {
                     name: user.name,
                     email: user.email,
                 },
-                token: generateToken(user._id),
+                token: generateToken(user._id.toString()),
             });
         } else {
             res.status(400).json({ message: 'Invalid user data' });
+            return;
         }
     } catch (error) {
         next(error);
     }
 };
 
-// @desc    Auth user & get token
-// @route   POST /auth/login
-// @access  Public
-const login = async (req, res, next) => {
+export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { error } = loginSchema.validate(req.body);
-        if (error) return res.status(400).json({ message: error.details[0].message });
+        if (error) {
+             res.status(400).json({ message: error.details[0].message });
+             return;
+        }
 
         const { email, password } = req.body;
-
-        // Check for user email
         const user = await User.findOne({ email });
 
         if (user && (await user.matchPassword(password))) {
@@ -78,7 +79,7 @@ const login = async (req, res, next) => {
                     name: user.name,
                     email: user.email,
                 },
-                token: generateToken(user._id),
+                token: generateToken(user._id.toString()),
             });
         } else {
             res.status(401).json({ message: 'Invalid email or password' });
@@ -88,11 +89,13 @@ const login = async (req, res, next) => {
     }
 };
 
-// @desc    Get user profile
-// @route   GET /auth/profile
-// @access  Private
-const getProfile = async (req, res, next) => {
+export const getProfile = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
+        if (!req.user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+        
         const user = await User.findById(req.user._id);
 
         if (user) {
@@ -110,40 +113,34 @@ const getProfile = async (req, res, next) => {
     }
 };
 
-const sendEmail = require('../utils/sendEmail');
-
 const resetPasswordSchema = Joi.object({
     email: Joi.string().email().required(),
     otp: Joi.string().length(6).required(),
     newPassword: Joi.string().min(6).required()
 });
 
-// @desc    Forgot Password Request
-// @route   POST /auth/forgot-password
-// @access  Public
-const forgotPassword = async (req, res, next) => {
+export const forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { error } = forgotPasswordSchema.validate(req.body);
-        if (error) return res.status(400).json({ message: error.details[0].message });
+        if (error) {
+            res.status(400).json({ message: error.details[0].message });
+            return;
+        }
 
         const { email } = req.body;
-        
         const user = await User.findOne({ email });
         
         if (!user) {
-            // For security, still return success so attackers can't verify emails easily
-            return res.status(200).json({ message: 'If that email is registered, an OTP has been sent.' });
+            res.status(200).json({ message: 'If that email is registered, an OTP has been sent.' });
+            return;
         }
 
-        // Generate a 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         
-        // Save OTP to user (expires in 10 minutes)
         user.resetPasswordOtp = otp;
-        user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+        user.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000);
         await user.save({ validateBeforeSave: false });
 
-        // Send Email
         const message = `You requested a password reset. Your OTP code is: \n\n ${otp} \n\n This code expires in 10 minutes.`;
 
         try {
@@ -157,22 +154,21 @@ const forgotPassword = async (req, res, next) => {
             console.error(err);
             user.resetPasswordOtp = undefined;
             user.resetPasswordExpire = undefined;
-            await user.save({ validateBeforeSave: false });
-            // Even on error sending email, we might just wanna say server error
-            return res.status(500).json({ message: 'Email could not be sent' });
+            await user.save();
+            res.status(500).json({ message: 'Email could not be sent' });
         }
     } catch (error) {
         next(error);
     }
 };
 
-// @desc    Reset Password
-// @route   POST /auth/reset-password
-// @access  Public
-const resetPassword = async (req, res, next) => {
+export const resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { error } = resetPasswordSchema.validate(req.body);
-        if (error) return res.status(400).json({ message: error.details[0].message });
+        if (error) {
+            res.status(400).json({ message: error.details[0].message });
+            return;
+        }
 
         const { email, otp, newPassword } = req.body;
 
@@ -183,10 +179,10 @@ const resetPassword = async (req, res, next) => {
         });
 
         if (!user) {
-            return res.status(400).json({ message: 'Invalid or expired OTP' });
+            res.status(400).json({ message: 'Invalid or expired OTP' });
+            return;
         }
 
-        // Set new password
         user.password = newPassword;
         user.resetPasswordOtp = undefined;
         user.resetPasswordExpire = undefined;
@@ -196,12 +192,4 @@ const resetPassword = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-};
-
-module.exports = {
-    signup,
-    login,
-    getProfile,
-    forgotPassword,
-    resetPassword
 };

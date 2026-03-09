@@ -1,12 +1,14 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const connectDB = require('./config/db');
-const authRoutes = require('./routes/authRoutes');
+import dotenv from 'dotenv';
+dotenv.config();
 
-const app = express();
+import express, { Express, Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import connectDB from './config/db';
+import authRoutes from './routes/authRoutes';
+
+const app: Express = express();
 
 // Connect Database
 connectDB();
@@ -28,12 +30,12 @@ app.use('/auth', limiter);
 app.use('/auth', authRoutes);
 
 // Root route
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
     res.status(200).json({ success: true, message: 'Smart Gym API is running' });
 });
 
 // Error Handling Middleware
-app.use((err, req, res, next) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     console.error(err.stack);
     res.status(500).json({ success: false, message: 'Server error', error: err.message });
 });
