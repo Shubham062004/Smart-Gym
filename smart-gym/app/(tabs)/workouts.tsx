@@ -1,8 +1,25 @@
-import React from 'react';
-import { View, Text, ScrollView, TextInput, ImageBackground, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TextInput, ImageBackground, TouchableOpacity, SafeAreaView, StyleSheet, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useWorkout } from '../../src/hooks/useWorkout';
 
 export default function Workouts() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const { searchExercises, startWorkout } = useWorkout();
+  
+  const { data: searchResults, isLoading: isSearching } = searchExercises(searchQuery);
+
+  const handleStartWorkout = async (workoutId: string) => {
+    try {
+      await startWorkout(workoutId);
+      // Navigate to workout camera
+      router.push('/workout-camera' as any);
+    } catch (e) {
+      console.warn("Could not start workout", e);
+    }
+  };
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
       {/* Header */}
@@ -24,8 +41,11 @@ export default function Workouts() {
             className="flex-1 ml-2 text-base text-slate-900 dark:text-white h-full"
             placeholder="Search exercises"
             placeholderTextColor="#9da6b9"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
           />
         </View>
+        {isSearching && <ActivityIndicator style={{ marginTop: 8 }} />}
       </View>
 
       {/* Scrollable Content */}
@@ -85,7 +105,10 @@ export default function Workouts() {
                 <View className="w-6 h-6 rounded-full bg-slate-700 border-2 border-white flex items-center justify-center"><Text className="text-[8px] text-white">JD</Text></View>
                 <View className="w-6 h-6 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center"><Text className="text-[8px] text-white">+3</Text></View>
               </View>
-              <TouchableOpacity className="flex-row items-center justify-center rounded-full h-9 px-5 bg-blue-600 text-white gap-2 shadow-lg">
+              <TouchableOpacity 
+                className="flex-row items-center justify-center rounded-full h-9 px-5 bg-blue-600 text-white gap-2 shadow-lg"
+                onPress={() => handleStartWorkout('pushups')}
+              >
                 <MaterialIcons name="play-arrow" size={18} color="white" />
                 <Text className="text-white text-sm font-medium">Start</Text>
               </TouchableOpacity>
@@ -119,7 +142,10 @@ export default function Workouts() {
             </View>
             <View className="flex-row items-end justify-between mt-3">
               <View className="flex-row"></View>
-              <TouchableOpacity className="flex-row items-center justify-center rounded-full h-9 px-5 bg-blue-600 text-white gap-2 shadow-lg">
+              <TouchableOpacity 
+                className="flex-row items-center justify-center rounded-full h-9 px-5 bg-blue-600 text-white gap-2 shadow-lg"
+                onPress={() => handleStartWorkout('squats')}
+              >
                 <MaterialIcons name="play-arrow" size={18} color="white" />
                 <Text className="text-white text-sm font-medium">Start</Text>
               </TouchableOpacity>
@@ -153,7 +179,10 @@ export default function Workouts() {
             </View>
             <View className="flex-row items-end justify-between mt-3">
               <View className="flex-row"></View>
-              <TouchableOpacity className="flex-row items-center justify-center rounded-full h-9 px-5 bg-blue-600 text-white gap-2 shadow-lg">
+              <TouchableOpacity 
+                className="flex-row items-center justify-center rounded-full h-9 px-5 bg-blue-600 text-white gap-2 shadow-lg"
+                onPress={() => handleStartWorkout('planks')}
+              >
                 <MaterialIcons name="play-arrow" size={18} color="white" />
                 <Text className="text-white text-sm font-medium">Start</Text>
               </TouchableOpacity>

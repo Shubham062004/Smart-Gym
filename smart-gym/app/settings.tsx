@@ -1,10 +1,54 @@
 import React from 'react';
-import { View, Text, ScrollView, ImageBackground, TouchableOpacity, SafeAreaView, Switch } from 'react-native';
+import { View, Text, ScrollView, ImageBackground, TouchableOpacity, SafeAreaView, Switch, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../src/hooks/useAuth';
+import { useProfile } from '../src/hooks/useProfile';
+import { useAuthStore } from '../src/store/authStore';
+import { useUserStore } from '../src/store/userStore';
 
 export default function Settings() {
   const router = useRouter();
+  const { logout, isLoggingOut } = useAuth();
+  const { deleteAccount, updateSettings } = useProfile();
+  const { user } = useAuthStore();
+  const { preferences, updatePreferences } = useUserStore();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.replace('/login');
+    } catch (e) {
+      Alert.alert('Error', 'Failed to log out');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    Alert.alert('Delete Account', 'Are you sure you want to delete your account? This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        try {
+          await deleteAccount();
+          await logout();
+          router.replace('/login');
+        } catch (e) {
+          Alert.alert('Error', 'Failed to delete account');
+        }
+      }}
+    ]);
+  };
+
+  const toggleDarkMode = () => {
+    const newValue = !preferences.darkMode;
+    updatePreferences({ darkMode: newValue });
+    updateSettings({ darkMode: newValue });
+  };
+
+  const toggleNotifications = () => {
+    const newValue = !preferences.notifications;
+    updatePreferences({ notifications: newValue });
+    updateSettings({ notifications: newValue });
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
@@ -30,12 +74,12 @@ export default function Settings() {
               />
             </View>
             <View className="flex-1">
-              <Text className="text-lg font-bold text-slate-900 dark:text-white">Alex Johnson</Text>
+              <Text className="text-lg font-bold text-slate-900 dark:text-white">{user?.name || 'User'}</Text>
               <View className="self-start px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 rounded-full mt-1">
                 <Text className="text-blue-600 dark:text-blue-400 text-xs font-semibold">Pro Member</Text>
               </View>
             </View>
-            <TouchableOpacity className="bg-blue-600 px-4 py-2 rounded-full">
+            <TouchableOpacity className="bg-blue-600 px-4 py-2 rounded-full" onPress={() => router.push('/edit-profile' as any)}>
               <Text className="text-white text-sm font-medium">Edit Profile</Text>
             </TouchableOpacity>
           </View>
@@ -57,7 +101,7 @@ export default function Settings() {
                 <MaterialIcons name="mail" size={24} color="#94a3b8" />
                 <View>
                   <Text className="text-slate-900 dark:text-white">Email</Text>
-                  <Text className="text-xs text-slate-500">alex.j@fitness.com</Text>
+                  <Text className="text-xs text-slate-500">{user?.email || 'email@example.com'}</Text>
                 </View>
               </View>
               <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
@@ -84,14 +128,14 @@ export default function Settings() {
                 <MaterialIcons name="dark-mode" size={24} color="#94a3b8" />
                 <Text className="text-slate-900 dark:text-white">Dark Mode</Text>
               </View>
-              <Switch value={true} trackColor={{ false: "#cbd5e1", true: "#2563eb" }} />
+              <Switch value={preferences.darkMode} onValueChange={toggleDarkMode} trackColor={{ false: "#cbd5e1", true: "#2563eb" }} />
             </View>
             <View className="flex-row items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700">
               <View className="flex-row items-center gap-3">
                 <MaterialIcons name="notifications-active" size={24} color="#94a3b8" />
                 <Text className="text-slate-900 dark:text-white">Notifications</Text>
               </View>
-              <Switch value={true} trackColor={{ false: "#cbd5e1", true: "#2563eb" }} />
+              <Switch value={preferences.notifications} onValueChange={toggleNotifications} trackColor={{ false: "#cbd5e1", true: "#2563eb" }} />
             </View>
           </View>
         </View>
@@ -100,13 +144,13 @@ export default function Settings() {
         <View className="mb-10 gap-2">
           <Text className="text-sm font-semibold text-red-500 uppercase tracking-wider px-2">Danger Zone</Text>
           <View className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-red-500/20">
-            <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700" onPress={() => router.replace('/login')}>
+            <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700" onPress={handleLogout} disabled={isLoggingOut}>
               <View className="flex-row items-center gap-3">
                 <MaterialIcons name="logout" size={24} color="#ef4444" />
-                <Text className="text-red-500 font-medium">Log Out</Text>
+                <Text className="text-red-500 font-medium">{isLoggingOut ? 'Logging Out...' : 'Log Out'}</Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity className="flex-row items-center justify-between p-4">
+            <TouchableOpacity className="flex-row items-center justify-between p-4" onPress={handleDeleteAccount}>
               <View className="flex-row items-center gap-3">
                 <MaterialIcons name="delete-forever" size={24} color="#dc2626" />
                 <Text className="text-red-600 font-medium">Delete Account</Text>
@@ -124,3 +168,4 @@ export default function Settings() {
     </SafeAreaView>
   );
 }
+

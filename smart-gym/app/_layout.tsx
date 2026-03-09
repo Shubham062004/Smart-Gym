@@ -1,17 +1,38 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { router, Stack, Slot } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import '../global.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useAuthStore } from '../src/store/authStore';
 
 export const unstable_settings = {
   initialRouteName: 'index',
 };
 
-export default function RootLayout() {
+const queryClient = new QueryClient();
+
+function InitialLayout() {
   const colorScheme = useColorScheme();
+  const { token } = useAuthStore();
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Wait for the navigation tree to be ready
+    setIsReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isReady) return;
+    
+    // Auth guard
+    if (token) {
+      router.replace('/(tabs)');
+    }
+  }, [token, isReady]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -28,5 +49,13 @@ export default function RootLayout() {
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <InitialLayout />
+    </QueryClientProvider>
   );
 }

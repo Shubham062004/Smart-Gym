@@ -2,9 +2,22 @@ import React from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useAuthStore } from '../../src/store/authStore';
+import { useWorkout } from '../../src/hooks/useWorkout';
 
 export default function Homepage() {
   const router = useRouter();
+  const { user } = useAuthStore();
+  const { todayWorkout, isLoadingToday, startWorkout } = useWorkout();
+
+  const handleStartWorkout = async (workoutId: string) => {
+    try {
+      await startWorkout(workoutId);
+      router.push('/workout-camera' as any);
+    } catch (e) {
+      console.warn("Could not start workout", e);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
@@ -21,7 +34,7 @@ export default function Homepage() {
             </View>
             <View>
               <Text className="text-sm font-medium text-slate-500 dark:text-slate-400">Welcome back,</Text>
-              <Text className="text-xl font-bold text-slate-900 dark:text-white leading-tight">Shubham</Text>
+              <Text className="text-xl font-bold text-slate-900 dark:text-white leading-tight">{user?.name || 'User'}</Text>
             </View>
           </View>
           <View className="flex-row items-center gap-1.5 bg-orange-100 dark:bg-orange-500/20 px-3 py-1.5 rounded-full border border-orange-500/20">
@@ -102,9 +115,9 @@ export default function Homepage() {
               <View className="h-24 w-full bg-slate-200 dark:bg-slate-700 rounded-lg overflow-hidden relative">
                 <Image source={{ uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuCabioM815Tvfv8uoBdxjhd9-lEIYcJ9wq3s2_rVno8O8Pi3s3iY-jtP4fA75lBzLwt-xASROPfEdgpnps00-H-x_Ui8y7MNx9fpT-aNQhAU5GayhXzK56X3GLen9vO3d-z4diNSrD_EG8sbgE2L4SAO1KL5Y1kuH-iGvQY5hlabNGNWQmNt9mJCryQFNGPC7cAvORN7wqmkzhhbfG1sEz__hKspKXyLsYH_L_wiJaknXTFMXCV4McW5cjIBpOvAOIlNdW8ytRei3E" }} className="w-full h-full absolute" />
                 <View className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <View className="bg-white/20 p-2 rounded-full">
+                  <TouchableOpacity className="bg-white/20 p-2 rounded-full" onPress={() => handleStartWorkout('pushups')}>
                     <MaterialIcons name="play-arrow" size={24} color="white" />
-                  </View>
+                  </TouchableOpacity>
                 </View>
               </View>
               <View className="p-3">
@@ -121,9 +134,9 @@ export default function Homepage() {
               <View className="h-24 w-full bg-slate-200 dark:bg-slate-700 rounded-lg overflow-hidden relative">
                 <Image source={{ uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuBMAihkbqE5Cx1P38prNCrMREfQWL-ZAuh8yH5QpV13eIhaUJTwSv4141F4fxhv1XfY1LIT1QS8P20RRnEMPNdkkFj_pbaB9ASlY2lxec_1bZzf5h4cyUTZO45uAECxGZmGXTDV1G_fKTZEFlXuKsNGAUMFgprg5S3jspr9m452Y99_KNXtCcE_qfTKXapOhgPfI2aEdPUcZcfPrz7rPAMuTAD_OxavuIKFK3jNUf24T2Lh-NRCPoxc92tO8xD2aAho2cvdA-np3iU" }} className="w-full h-full absolute" />
                 <View className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <View className="bg-white/20 p-2 rounded-full">
+                  <TouchableOpacity className="bg-white/20 p-2 rounded-full" onPress={() => handleStartWorkout('squats')}>
                     <MaterialIcons name="play-arrow" size={24} color="white" />
-                  </View>
+                  </TouchableOpacity>
                 </View>
               </View>
               <View className="p-3">
@@ -140,9 +153,9 @@ export default function Homepage() {
               <View className="h-24 w-full bg-slate-200 dark:bg-slate-700 rounded-lg overflow-hidden relative">
                 <Image source={{ uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuCESj5_g1EuooapcJdKGWxkKw2idpE1bcCRAi0ZG-sQpPcjvSSqg2MmCN716sdKBkVBHfAu3_2a997k6vOXVH3l2p262F2sicF-8tTnqAvdPRTERrNpqqYZjFsB-PgqFCktQZ_Zdt0y9Kyxm1XiR-od92p4rzR5tAanuy7RcR_vYfI7cVQQ_X3fvQt8Wkuj85zebwWm7XacWrp61pzcYBSVRAXklVX9P1NoySxsZk_WoW_9hh4oU2KAgSaA3GWRqdm-TAESihaL704" }} className="w-full h-full absolute" />
                 <View className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <View className="bg-white/20 p-2 rounded-full">
+                  <TouchableOpacity className="bg-white/20 p-2 rounded-full" onPress={() => handleStartWorkout('crunches')}>
                     <MaterialIcons name="play-arrow" size={24} color="white" />
-                  </View>
+                  </TouchableOpacity>
                 </View>
               </View>
               <View className="p-3">

@@ -2,9 +2,11 @@ import React from 'react';
 import { View, Text, ScrollView, ImageBackground, TouchableOpacity, SafeAreaView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useAuthStore } from '../../src/store/authStore';
 
 export default function Profile() {
   const router = useRouter();
+  const { user } = useAuthStore();
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
@@ -37,7 +39,7 @@ export default function Profile() {
             </TouchableOpacity>
           </View>
           <View className="mt-4 items-center">
-            <Text className="text-2xl font-bold text-slate-900 dark:text-white">Shubham</Text>
+            <Text className="text-2xl font-bold text-slate-900 dark:text-white">{user?.name || 'User'}</Text>
             <Text className="text-slate-500 dark:text-slate-400 font-medium">Intermediate Athlete</Text>
             <View className="mt-2 flex-row items-center gap-1.5 bg-blue-100 dark:bg-blue-900/40 px-3 py-1 rounded-full">
               <MaterialIcons name="verified" size={12} color="#2563eb" />
@@ -50,15 +52,15 @@ export default function Profile() {
         <View className="flex-row gap-3 my-4">
           <View className="flex-1 bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-4 flex-col items-center bg-white dark:bg-slate-800 shadow-sm">
             <Text className="text-slate-400 text-xs font-medium uppercase">Age</Text>
-            <Text className="text-xl font-bold mt-1 text-slate-900 dark:text-white">26</Text>
+            <Text className="text-xl font-bold mt-1 text-slate-900 dark:text-white">{user?.age || '-'}</Text>
           </View>
           <View className="flex-1 bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-4 flex-col items-center bg-white dark:bg-slate-800 shadow-sm">
             <Text className="text-slate-400 text-xs font-medium uppercase">Height</Text>
-            <Text className="text-xl font-bold mt-1 text-slate-900 dark:text-white">178<Text className="text-xs ml-0.5">cm</Text></Text>
+            <Text className="text-xl font-bold mt-1 text-slate-900 dark:text-white">{user?.height || '-'}<Text className="text-xs ml-0.5">cm</Text></Text>
           </View>
           <View className="flex-1 bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-4 flex-col items-center bg-white dark:bg-slate-800 shadow-sm">
             <Text className="text-slate-400 text-xs font-medium uppercase">Weight</Text>
-            <Text className="text-xl font-bold mt-1 text-slate-900 dark:text-white">75<Text className="text-xs ml-0.5">kg</Text></Text>
+            <Text className="text-xl font-bold mt-1 text-slate-900 dark:text-white">{user?.weight || '-'}<Text className="text-xs ml-0.5">kg</Text></Text>
           </View>
         </View>
 
@@ -137,7 +139,7 @@ export default function Profile() {
 
         {/* CTA */}
         <View className="pt-4 pb-10">
-          <TouchableOpacity className="w-full bg-blue-600 items-center justify-center py-4 rounded-xl shadow-lg">
+          <TouchableOpacity className="w-full bg-blue-600 items-center justify-center py-4 rounded-xl shadow-lg" onPress={() => router.push('/edit-profile' as any)}>
             <Text className="text-white font-bold text-lg">Update Profile</Text>
           </TouchableOpacity>
         </View>
