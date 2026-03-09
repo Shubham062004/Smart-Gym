@@ -64,7 +64,12 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <MaterialIcons name="person" size={28} color={color} />,
         }}
       />
-      {/* If any other tab screens exist inside (tabs), they would need options or be hidden. */}
+      <Tabs.Screen
+        name="history"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
