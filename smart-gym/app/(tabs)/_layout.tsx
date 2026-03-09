@@ -36,13 +36,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="history"
+        name="progress"
         options={{
-          title: 'Log',
+          title: 'Progress',
           tabBarIcon: ({ color }) => (
             <View style={{
               marginTop: -20,
-              backgroundColor: '#2563eb',
+              backgroundColor: '#258cf4',
               width: 56,
               height: 56,
               borderRadius: 28,
@@ -51,10 +51,10 @@ export default function TabLayout() {
               borderWidth: 4,
               borderColor: colorScheme === 'dark' ? '#111621' : '#ffffff',
             }}>
-              <MaterialIcons name="history" size={28} color="white" />
+              <MaterialIcons name="bar-chart" size={28} color="white" />
             </View>
           ),
-          tabBarLabel: 'History',
+          tabBarLabel: 'Progress',
         }}
       />
       <Tabs.Screen
