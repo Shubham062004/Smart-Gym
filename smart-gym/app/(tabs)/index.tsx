@@ -24,7 +24,7 @@ export default function Homepage() {
       <ScrollView className="flex-1 pb-20">
         {/* Header Section */}
         <View className="flex-row items-center justify-between p-6 pt-4">
-          <View className="flex-row items-center gap-3">
+          <TouchableOpacity className="flex-row items-center gap-3" onPress={() => router.push('/profile')}>
             <View className="relative">
               <Image 
                 source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAC9UnceYa6FTFVwFTia-jGG_CwQkFNcydm0WV-sE4r1Qs1KV9KWA2D3Bh8RYOY7NIrw0YjlqZFNgWyeGF4IVfyrxVm0NpNn6_lnUQpVELI4k924BS2On2vlENe09aYz1h1xvcHlM2MB5FVFEulBD79msj0Zl4YBPnpNrgI1OUsTHglSY5lnAFlRlYvday4rDlL16SPWxreYzclZ4RrZRK4TxT-g94j7W_nR42bk_-7UU-NPsnvB2Z2U0F3nxZiemhX8-BVXp2lXO0' }} 
@@ -36,7 +36,7 @@ export default function Homepage() {
               <Text className="text-sm font-medium text-slate-500 dark:text-slate-400">Welcome back,</Text>
               <Text className="text-xl font-bold text-slate-900 dark:text-white leading-tight">{user?.name || 'User'}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
           <View className="flex-row items-center gap-1.5 bg-orange-100 dark:bg-orange-500/20 px-3 py-1.5 rounded-full border border-orange-500/20">
             <MaterialIcons name="local-fire-department" size={20} color="#f97316" />
             <Text className="text-sm font-bold text-orange-600 dark:text-orange-400">12</Text>
