@@ -110,6 +110,14 @@ const getProfile = async (req, res, next) => {
     }
 };
 
+const sendEmail = require('../utils/sendEmail');
+
+const resetPasswordSchema = Joi.object({
+    email: Joi.string().email().required(),
+    otp: Joi.string().length(6).required(),
+    newPassword: Joi.string().min(6).required()
+});
+
 // @desc    Forgot Password Request
 // @route   POST /auth/forgot-password
 // @access  Public
@@ -120,10 +128,71 @@ const forgotPassword = async (req, res, next) => {
 
         const { email } = req.body;
         
-        // For now, always return success to not leak registered emails,
-        // or actually verify if needed. The instruction asks to just validate and return success.
+        const user = await User.findOne({ email });
         
-        res.status(200).json({ message: 'Password reset link sent to your email.' });
+        if (!user) {
+            // For security, still return success so attackers can't verify emails easily
+            return res.status(200).json({ message: 'If that email is registered, an OTP has been sent.' });
+        }
+
+        // Generate a 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Save OTP to user (expires in 10 minutes)
+        user.resetPasswordOtp = otp;
+        user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+        await user.save({ validateBeforeSave: false });
+
+        // Send Email
+        const message = `You requested a password reset. Your OTP code is: \n\n ${otp} \n\n This code expires in 10 minutes.`;
+
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: 'Password Reset OTP',
+                message
+            });
+            res.status(200).json({ message: 'If that email is registered, an OTP has been sent.' });
+        } catch (err) {
+            console.error(err);
+            user.resetPasswordOtp = undefined;
+            user.resetPasswordExpire = undefined;
+            await user.save({ validateBeforeSave: false });
+            // Even on error sending email, we might just wanna say server error
+            return res.status(500).json({ message: 'Email could not be sent' });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Reset Password
+// @route   POST /auth/reset-password
+// @access  Public
+const resetPassword = async (req, res, next) => {
+    try {
+        const { error } = resetPasswordSchema.validate(req.body);
+        if (error) return res.status(400).json({ message: error.details[0].message });
+
+        const { email, otp, newPassword } = req.body;
+
+        const user = await User.findOne({
+            email,
+            resetPasswordOtp: otp,
+            resetPasswordExpire: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired OTP' });
+        }
+
+        // Set new password
+        user.password = newPassword;
+        user.resetPasswordOtp = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save();
+
+        res.status(200).json({ message: 'Password reset successful. You can now login.' });
     } catch (error) {
         next(error);
     }
@@ -133,5 +202,6 @@ module.exports = {
     signup,
     login,
     getProfile,
-    forgotPassword
+    forgotPassword,
+    resetPassword
 };

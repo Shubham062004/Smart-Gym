@@ -27,6 +27,11 @@ app.use('/auth', limiter);
 // Routes
 app.use('/auth', authRoutes);
 
+// Root route
+app.get('/', (req, res) => {
+    res.status(200).json({ success: true, message: 'Smart Gym API is running' });
+});
+
 // Error Handling Middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);

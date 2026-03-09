@@ -18,7 +18,7 @@ interface OnboardingScreen1Props {
   onSkip: () => void;
 }
 
-// Material Symbol replacement using Unicode / emoji approximations
+// Minimal Material Symbol replacements using Unicode or basic shapes
 const CheckCircleIcon: React.FC = () => (
   <Text style={{ color: '#4ade80', fontSize: 16 }}>✓</Text>
 );
@@ -28,7 +28,7 @@ const AnalyticsIcon: React.FC = () => (
 );
 
 const ArrowForwardIcon: React.FC = () => (
-  <Text style={{ color: '#fff', fontSize: 18 }}>→</Text>
+  <Text style={{ color: '#fff', fontSize: 18, marginLeft: 8 }}>→</Text>
 );
 
 const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({
@@ -36,8 +36,6 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({
   onSkip,
 }) => {
   const barAnim = useRef<Animated.Value>(new Animated.Value(0)).current;
-  const fadeAnim = useRef<Animated.Value>(new Animated.Value(0)).current;
-  const slideAnim = useRef<Animated.Value>(new Animated.Value(30)).current;
 
   useEffect(() => {
     Animated.timing(barAnim, {
@@ -46,21 +44,6 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({
       delay: 400,
       useNativeDriver: false,
     }).start();
-
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 600,
-        delay: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 600,
-        delay: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
   }, []);
 
   const barWidth = barAnim.interpolate({
@@ -73,14 +56,16 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({
       <StatusBar barStyle="light-content" backgroundColor="#111621" />
       <View style={styles.container}>
 
+        {/* Top Navigation */}
         <View style={styles.topNav}>
           <TouchableOpacity onPress={onSkip} activeOpacity={0.7}>
             <Text style={styles.skipText}>Skip</Text>
           </TouchableOpacity>
         </View>
 
+        {/* Main Content Area */}
         <View style={styles.content}>
-
+          {/* Illustration Container */}
           <View style={styles.imageCard}>
             <ImageBackground
               source={{
@@ -120,20 +105,17 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({
             </ImageBackground>
           </View>
 
-          <Animated.View
-            style={[
-              styles.textBlock,
-              { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
-            ]}
-          >
+          {/* Text Content */}
+          <View style={styles.textBlock}>
             <Text style={styles.heading}>AI Posture Tracking</Text>
             <Text style={styles.subheading}>
               Perfect your form with real-time AI feedback to prevent injuries
               and maximize gains.
             </Text>
-          </Animated.View>
+          </View>
         </View>
 
+        {/* Bottom Controls */}
         <View style={styles.bottomControls}>
           <View style={styles.dotsRow}>
             <View style={[styles.dot, styles.dotActive]} />
@@ -167,21 +149,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#111621',
     alignItems: 'center',
-    maxWidth: 448,
-    alignSelf: 'center',
     width: '100%',
   },
 
   topNav: {
     width: '100%',
     paddingHorizontal: 24,
-    paddingTop: 8,
-    paddingBottom: 4,
+    paddingTop: 32,
+    paddingBottom: 16,
     alignItems: 'flex-end',
     zIndex: 10,
   },
   skipText: {
-    color: '#94a3b8',
+    color: '#94a3b8', // slate-400
     fontSize: 14,
     fontWeight: '600',
     letterSpacing: 0.5,
@@ -201,25 +181,25 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#1e293b',
+    borderColor: '#1e293b', // slate-800
     marginBottom: 32,
-    backgroundColor: '#1a2233',
+    backgroundColor: '#1a2233', // surface-dark
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
   },
   imageBg: {
     flex: 1,
-    justifyContent: 'space-between',
   },
   imageStyle: {
     borderRadius: 16,
   },
 
   gradientOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '50%',
-    backgroundColor: 'rgba(17,22,33,0.75)',
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(17,22,33,0.3)',
   },
 
   formBadge: {
@@ -231,14 +211,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.6)',
     borderRadius: 999,
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
 
   formBadgeText: {
     color: '#fff',
     fontSize: 12,
     fontWeight: '500',
-    marginLeft: 4,
+    marginLeft: 8,
   },
 
   analyticsCard: {
@@ -246,18 +228,20 @@ const styles = StyleSheet.create({
     bottom: 24,
     left: 24,
     right: 24,
-    backgroundColor: 'rgba(17,22,33,0.85)',
+    backgroundColor: 'rgba(17,22,33,0.8)',
     borderRadius: 12,
     padding: 12,
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
 
   analyticsIconBg: {
-    height: 36,
-    width: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(36,99,235,0.2)',
+    height: 32,
+    width: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(36,99,235,0.2)', // primary/20
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -277,85 +261,94 @@ const styles = StyleSheet.create({
   progressTrack: {
     width: 128,
     height: 6,
-    backgroundColor: '#334155',
+    backgroundColor: '#334155', // slate-700
     borderRadius: 999,
     overflow: 'hidden',
   },
 
   progressFill: {
     height: '100%',
-    backgroundColor: '#2463eb',
+    backgroundColor: '#2463eb', // primary
     borderRadius: 999,
   },
 
   analyticsPercent: {
-    color: '#4ade80',
+    color: '#4ade80', // green-400
     fontSize: 12,
     fontWeight: '700',
-    marginLeft: 12,
+    marginLeft: 'auto',
   },
 
   textBlock: {
     alignItems: 'center',
     maxWidth: 320,
+    width: '100%',
   },
 
   heading: {
-    color: '#f1f5f9',
+    color: '#f1f5f9', // slate-100
     fontSize: 28,
     fontWeight: '700',
     textAlign: 'center',
     marginBottom: 12,
+    letterSpacing: -0.5,
   },
 
   subheading: {
-    color: '#94a3b8',
-    fontSize: 15,
+    color: '#94a3b8', // slate-400
+    fontSize: 16,
     lineHeight: 24,
     textAlign: 'center',
+    fontWeight: '400',
   },
 
   bottomControls: {
     width: '100%',
     paddingHorizontal: 24,
     paddingBottom: 40,
-    paddingTop: 16,
+    paddingTop: 24,
     alignItems: 'center',
+    backgroundColor: '#111621',
   },
 
   dotsRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
   },
 
   dot: {
     height: 8,
     width: 8,
     borderRadius: 999,
-    backgroundColor: '#334155',
+    backgroundColor: '#334155', // slate-700
     marginHorizontal: 4,
   },
 
   dotActive: {
     width: 24,
-    backgroundColor: '#2463eb',
+    backgroundColor: '#2463eb', // primary
   },
 
   nextButton: {
     width: '100%',
-    backgroundColor: '#2463eb',
+    backgroundColor: '#2463eb', // primary
     height: 56,
-    borderRadius: 12,
+    borderRadius: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
+    shadowColor: '#2463eb',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 4,
   },
 
   nextButtonText: {
     color: '#fff',
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '700',
-    marginRight: 8,
   },
 });

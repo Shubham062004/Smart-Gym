@@ -1,118 +1,78 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  Animated,
   StatusBar,
   SafeAreaView,
-  Dimensions,
 } from 'react-native';
-
-const { width } = Dimensions.get('window');
 
 interface OnboardingScreen2Props {
   onNext: () => void;
 }
 
-const OnboardingScreen2: React.FC<OnboardingScreen2Props> = ({ onNext }) => {
-  const scaleAnim = useRef<Animated.Value>(new Animated.Value(0.8)).current;
-  const fadeAnim = useRef<Animated.Value>(new Animated.Value(0)).current;
-  const slideAnim = useRef<Animated.Value>(new Animated.Value(40)).current;
-  const pulseAnim = useRef<Animated.Value>(new Animated.Value(1)).current;
+// Minimal Material Symbol replacements using Unicode or basic shapes
+const ShieldIcon: React.FC = () => (
+  // We use a simplified text symbol or emoji for the shield since material icons might not be installed
+  <Text style={{ color: '#0d55f2', fontSize: 100, textAlign: 'center' }}>🛡</Text>
+);
 
-  useEffect(() => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      tension: 60,
-      friction: 7,
-      delay: 200,
-      useNativeDriver: true,
-    }).start();
+const CameraIcon: React.FC = () => (
+  <Text style={{ color: '#0d55f2', fontSize: 24, textAlign: 'center' }}>📷</Text>
+);
 
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 600,
-        delay: 400,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 600,
-        delay: 400,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.06,
-          duration: 1800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 1800,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
+const OnboardingScreen2: React.FC<OnboardingScreen2Props> = ({
+  onNext,
+}) => {
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor="#101622" />
       <View style={styles.container}>
 
+        {/* Top Status Bar Area Spacer */}
         <View style={styles.topSpacer} />
 
+        {/* Page Indicators */}
         <View style={styles.dotsRow}>
-          <View style={styles.dotInactive} />
-          <View style={styles.dotActive} />
-          <View style={styles.dotInactive} />
+          <View style={styles.dot} />
+          <View style={[styles.dot, styles.dotActive]} />
+          <View style={styles.dot} />
         </View>
 
+        {/* Main Content */}
         <View style={styles.content}>
 
-          <Animated.View
-            style={[styles.iconWrapper, { transform: [{ scale: pulseAnim }] }]}
-          >
-            <Animated.View
-              style={[styles.iconInner, { transform: [{ scale: scaleAnim }] }]}
-            >
+          <View style={styles.illustrationContainer}>
+            {/* Illustration / Image */}
+            <View style={styles.circleBg}>
               <ShieldIcon />
-
-              <View style={styles.cameraBadge}>
+              <View style={styles.cameraIconContainer}>
                 <CameraIcon />
               </View>
-            </Animated.View>
-          </Animated.View>
+            </View>
 
-          <Animated.View
-            style={[
-              styles.textBlock,
-              { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
-            ]}
-          >
-            <Text style={styles.heading}>Privacy First</Text>
-            <Text style={styles.subheading}>
-              Your camera feed is processed locally and never stored on our servers.
-            </Text>
-          </Animated.View>
+            {/* Text Content */}
+            <View style={styles.textBlock}>
+              <Text style={styles.heading}>Privacy First</Text>
+              <Text style={styles.subheading}>
+                Your camera feed is processed locally and never stored on our servers.
+              </Text>
+            </View>
+          </View>
+
+          {/* Bottom Actions */}
+          <View style={styles.bottomControls}>
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={onNext}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.nextButtonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
-
-        <Animated.View style={[styles.bottomArea, { opacity: fadeAnim }]}>
-          <TouchableOpacity
-            style={styles.nextButton}
-            onPress={onNext}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.nextButtonText}>Next</Text>
-          </TouchableOpacity>
-        </Animated.View>
 
       </View>
     </SafeAreaView>
@@ -120,125 +80,6 @@ const OnboardingScreen2: React.FC<OnboardingScreen2Props> = ({ onNext }) => {
 };
 
 export default OnboardingScreen2;
-
-
-// Shield Icon
-const ShieldIcon: React.FC = () => {
-  return (
-    <View style={shieldStyles.container}>
-      <View style={shieldStyles.shieldOuter}>
-        <View style={shieldStyles.shieldTop} />
-        <View style={shieldStyles.shieldBottom} />
-      </View>
-
-      <View style={shieldStyles.lockWrapper}>
-        <View style={shieldStyles.lockShackle} />
-        <View style={shieldStyles.lockBody}>
-          <View style={shieldStyles.lockHole} />
-        </View>
-      </View>
-    </View>
-  );
-};
-
-const shieldStyles = StyleSheet.create({
-  container: {
-    width: 100,
-    height: 110,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  shieldOuter: {
-    width: 88,
-    height: 100,
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  shieldTop: {
-    width: 88,
-    height: 55,
-    backgroundColor: '#0d55f2',
-    borderTopLeftRadius: 44,
-    borderTopRightRadius: 44,
-  },
-  shieldBottom: {
-    width: 88,
-    height: 45,
-    backgroundColor: '#0d55f2',
-    borderBottomLeftRadius: 44,
-    borderBottomRightRadius: 88,
-  },
-  lockWrapper: {
-    position: 'absolute',
-    bottom: 10,
-    right: 0,
-    alignItems: 'center',
-  },
-  lockShackle: {
-    width: 18,
-    height: 14,
-    borderWidth: 4,
-    borderColor: '#101622',
-    borderBottomWidth: 0,
-    borderTopLeftRadius: 9,
-    borderTopRightRadius: 9,
-    marginBottom: -2,
-  },
-  lockBody: {
-    width: 26,
-    height: 22,
-    backgroundColor: '#101622',
-    borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  lockHole: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#0d55f2',
-  },
-});
-
-
-// Camera Icon
-const CameraIcon: React.FC = () => {
-  return (
-    <View style={cameraStyles.body}>
-      <View style={cameraStyles.bump} />
-      <View style={cameraStyles.lens} />
-    </View>
-  );
-};
-
-const cameraStyles = StyleSheet.create({
-  body: {
-    width: 32,
-    height: 24,
-    backgroundColor: '#0d55f2',
-    borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bump: {
-    position: 'absolute',
-    top: -6,
-    width: 12,
-    height: 6,
-    backgroundColor: '#0d55f2',
-    borderTopLeftRadius: 3,
-    borderTopRightRadius: 3,
-  },
-  lens: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#101622',
-    borderWidth: 2,
-    borderColor: '#3b7aff',
-  },
-});
-
 
 const styles = StyleSheet.create({
   safe: {
@@ -249,107 +90,131 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#101622',
     alignItems: 'center',
-    maxWidth: 400,
-    alignSelf: 'center',
     width: '100%',
   },
+
   topSpacer: {
-    height: 16,
+    height: 48,
+    width: '100%',
   },
 
   dotsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 20,
+    justifyContent: 'center',
+    paddingVertical: 24,
+    width: '100%',
   },
-  dotInactive: {
+
+  dot: {
     height: 10,
     width: 10,
-    borderRadius: 5,
-    backgroundColor: 'rgba(13,85,242,0.25)',
-    marginHorizontal: 5,
+    borderRadius: 999,
+    backgroundColor: 'rgba(13,85,242,0.3)', // primary/30
+    marginHorizontal: 6,
   },
+
   dotActive: {
-    height: 10,
     width: 32,
-    borderRadius: 5,
-    backgroundColor: '#0d55f2',
-    marginHorizontal: 5,
+    backgroundColor: '#0d55f2', // primary
   },
 
   content: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     paddingHorizontal: 24,
-    paddingTop: 32,
+    paddingVertical: 32,
+    justifyContent: 'space-between',
+    width: '100%',
   },
 
-  iconWrapper: {
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: 'rgba(13,85,242,0.05)',
-    borderWidth: 12,
-    borderColor: 'rgba(13,85,242,0.10)',
+  illustrationContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: 32,
   },
 
-  iconInner: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  cameraBadge: {
-    position: 'absolute',
-    bottom: -30,
-    right: -44,
-    backgroundColor: '#101622',
+  circleBg: {
+    width: 250,
+    height: 250,
     borderRadius: 999,
-    padding: 8,
+    backgroundColor: 'rgba(13,85,242,0.05)', // primary/5
+    borderWidth: 12,
+    borderColor: 'rgba(13,85,242,0.1)', // primary/10
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 48,
+    // Add shadow
+    shadowColor: '#0d55f2',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 30,
+    elevation: 8,
+  },
+
+  cameraIconContainer: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    backgroundColor: '#101622', // background-dark
+    borderRadius: 999,
+    padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
 
   textBlock: {
     alignItems: 'center',
-    maxWidth: 280,
-    marginTop: 48,
+    width: '100%',
   },
 
   heading: {
-    color: '#f1f5f9',
-    fontSize: 30,
+    color: '#f1f5f9', // slate-100
+    fontSize: 28,
     fontWeight: '700',
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 16,
+    letterSpacing: -0.5,
   },
 
   subheading: {
-    color: '#94a3b8',
-    fontSize: 15,
+    color: '#94a3b8', // slate-400
+    fontSize: 16,
     lineHeight: 24,
     textAlign: 'center',
+    fontWeight: '400',
+    maxWidth: 280,
   },
 
-  bottomArea: {
+  bottomControls: {
     width: '100%',
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-    paddingTop: 16,
+    paddingBottom: 32,
   },
 
   nextButton: {
     width: '100%',
-    backgroundColor: '#0d55f2',
+    backgroundColor: '#0d55f2', // primary
     height: 56,
+    paddingHorizontal: 24,
     borderRadius: 999,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#0d55f2',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
   },
 
   nextButtonText: {
     color: '#fff',
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '600',
+    letterSpacing: 0.5,
   },
 });
