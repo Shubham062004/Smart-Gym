@@ -38,9 +38,7 @@ function useProtectedRoute(user: any) {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const loaded = true; // Temporary bypass for missing fonts
 
   const { isAuthenticated, setAuth } = useAuthStore();
   
