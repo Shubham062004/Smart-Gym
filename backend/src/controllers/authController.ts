@@ -9,7 +9,17 @@ import { AuthRequest } from '../middleware/authMiddleware';
 const signupSchema = Joi.object({
     name: Joi.string().required(),
     email: Joi.string().email().required(),
-    password: Joi.string().min(6).required()
+    password: Joi.string()
+        .min(8)
+        .pattern(/[a-z]/)
+        .pattern(/[A-Z]/)
+        .pattern(/[0-9]/)
+        .pattern(/^(?!.*(\d)\1).*$/)
+        .required(),
+    age: Joi.number().optional(),
+    height: Joi.number().optional(),
+    weight: Joi.number().optional(),
+    goal: Joi.string().optional()
 });
 
 const loginSchema = Joi.object({
@@ -21,6 +31,23 @@ const forgotPasswordSchema = Joi.object({
     email: Joi.string().email().required()
 });
 
+const resetPasswordSchema = Joi.object({
+    email: Joi.string().email().required(),
+    otp: Joi.string().length(4).required(),
+    newPassword: Joi.string()
+        .min(8)
+        .pattern(/[a-z]/)
+        .pattern(/[A-Z]/)
+        .pattern(/[0-9]/)
+        .pattern(/^(?!.*(\d)\1).*$/)
+        .required()
+});
+
+const verifyOtpSchema = Joi.object({
+    email: Joi.string().email().required(),
+    otp: Joi.string().length(4).required()
+});
+
 export const signup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { error } = signupSchema.validate(req.body);
@@ -29,7 +56,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
             return;
         }
 
-        const { name, email, password } = req.body;
+        const { name, email, password, age, height, weight, goal } = req.body;
 
         const userExists = await User.findOne({ email });
         if (userExists) {
@@ -40,22 +67,25 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
         const user = await User.create({
             name,
             email,
-            password
+            password,
+            age: age ? parseInt(age) : undefined,
+            height: height ? parseFloat(height) : undefined,
+            weight: weight ? parseFloat(weight) : undefined,
+            fitness_goal: goal,
         });
 
-        if (user) {
-            res.status(201).json({
-                user: {
-                    _id: user._id,
-                    name: user.name,
-                    email: user.email,
-                },
-                token: generateToken(user._id.toString()),
-            });
-        } else {
-            res.status(400).json({ message: 'Invalid user data' });
-            return;
-        }
+        res.status(201).json({
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                age: user.age,
+                height: user.height,
+                weight: user.weight,
+                fitness_goal: user.fitness_goal,
+            },
+            token: generateToken(user._id.toString()),
+        });
     } catch (error) {
         next(error);
     }
@@ -75,7 +105,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
         if (user && (await user.matchPassword(password))) {
             res.json({
                 user: {
-                    _id: user._id,
+                    id: user._id,
                     name: user.name,
                     email: user.email,
                 },
@@ -95,16 +125,11 @@ export const getProfile = async (req: AuthRequest, res: Response, next: NextFunc
             res.status(404).json({ message: 'User not found' });
             return;
         }
-        
-        const user = await User.findById(req.user._id);
+
+        const user = await User.findById(req.user._id).select('-password');
 
         if (user) {
-            res.json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                createdAt: user.createdAt,
-            });
+            res.json(user);
         } else {
             res.status(404).json({ message: 'User not found' });
         }
@@ -112,12 +137,6 @@ export const getProfile = async (req: AuthRequest, res: Response, next: NextFunc
         next(error);
     }
 };
-
-const resetPasswordSchema = Joi.object({
-    email: Joi.string().email().required(),
-    otp: Joi.string().length(6).required(),
-    newPassword: Joi.string().min(6).required()
-});
 
 export const forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -131,32 +150,58 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
         const user = await User.findOne({ email });
         
         if (!user) {
-            res.status(200).json({ message: 'If that email is registered, an OTP has been sent.' });
+            res.status(404).json({ message: 'User not found' });
             return;
         }
 
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp = Math.floor(1000 + Math.random() * 9000).toString();
         
-        user.resetPasswordOtp = otp;
-        user.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000);
+        user.otp_code = otp;
+        user.otp_expires_at = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
         await user.save({ validateBeforeSave: false });
 
-        const message = `You requested a password reset. Your OTP code is: \n\n ${otp} \n\n This code expires in 10 minutes.`;
+        const message = `Your password reset OTP is ${otp}. This code will expire in 10 minutes.`;
 
         try {
             await sendEmail({
                 email: user.email,
-                subject: 'Password Reset OTP',
+                subject: 'OnlyFitness Password Reset',
                 message
             });
-            res.status(200).json({ message: 'If that email is registered, an OTP has been sent.' });
+            res.status(200).json({ message: 'OTP sent to your email.' }); 
         } catch (err) {
             console.error(err);
-            user.resetPasswordOtp = undefined;
-            user.resetPasswordExpire = undefined;
-            await user.save();
+            user.otp_code = undefined;
+            user.otp_expires_at = undefined;
+            await user.save({ validateBeforeSave: false });
             res.status(500).json({ message: 'Email could not be sent' });
         }
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const verifyOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { error } = verifyOtpSchema.validate(req.body);
+        if (error) {
+            res.status(400).json({ message: error.details[0].message });
+            return;
+        }
+
+        const { email, otp } = req.body;
+        const user = await User.findOne({ 
+            email,
+            otp_code: otp,
+            otp_expires_at: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            res.status(400).json({ message: 'Invalid or expired OTP' });
+            return;
+        }
+
+        res.status(200).json({ message: 'OTP verified successfully' });
     } catch (error) {
         next(error);
     }
@@ -174,8 +219,8 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
 
         const user = await User.findOne({
             email,
-            resetPasswordOtp: otp,
-            resetPasswordExpire: { $gt: Date.now() }
+            otp_code: otp,
+            otp_expires_at: { $gt: Date.now() }
         });
 
         if (!user) {
@@ -184,11 +229,11 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
         }
 
         user.password = newPassword;
-        user.resetPasswordOtp = undefined;
-        user.resetPasswordExpire = undefined;
+        user.otp_code = undefined;
+        user.otp_expires_at = undefined;
         await user.save();
 
-        res.status(200).json({ message: 'Password reset successful. You can now login.' });
+        res.status(200).json({ message: 'Password updated successfully.' });
     } catch (error) {
         next(error);
     }

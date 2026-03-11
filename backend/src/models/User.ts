@@ -5,8 +5,12 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password?: string;
-  resetPasswordOtp?: string;
-  resetPasswordExpire?: Date;
+  age?: number;
+  height?: number;
+  weight?: number;
+  fitness_goal?: string;
+  otp_code?: string;
+  otp_expires_at?: Date;
   createdAt: Date;
   matchPassword(enteredPassword: string): Promise<boolean>;
 }
@@ -25,8 +29,12 @@ const UserSchema = new Schema<IUser>({
       type: String,
       required: true,
   },
-  resetPasswordOtp: String,
-  resetPasswordExpire: Date,
+  age: Number,
+  height: Number,
+  weight: Number,
+  fitness_goal: String,
+  otp_code: String,
+  otp_expires_at: Date,
   createdAt: {
       type: Date,
       default: Date.now,
@@ -35,17 +43,18 @@ const UserSchema = new Schema<IUser>({
 
 // Hash password before saving
 UserSchema.pre('save', async function (next: any) {
-  if (!this.isModified('password')) {
+  if (!this.isModified('password') || !this.password) {
       return next();
   }
   const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password as string, salt);
+  this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
 // Compare entered password with hashed password
 UserSchema.methods.matchPassword = async function (enteredPassword: string): Promise<boolean> {
-  return await bcrypt.compare(enteredPassword, this.password as string);
+  if (!this.password) return false;
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
