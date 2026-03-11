@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
+import React from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -8,145 +8,150 @@ import * as z from 'zod';
 import { useProfile } from '../src/hooks/useProfile';
 import { useAuthStore } from '../src/store/authStore';
 
-const editProfileSchema = z.object({
-  name: z.string().min(2, 'Name is required'),
-  age: z.string().optional(),
-  height: z.string().optional(),
-  weight: z.string().optional(),
-  fitnessGoals: z.string().optional(),
+const profileSchema = z.object({
+  fullName: z.string().min(2, 'Name is required'),
+  age: z.number(),
+  height: z.number(),
+  weight: z.number(),
 });
 
-type EditProfileFormValues = z.infer<typeof editProfileSchema>;
+type ProfileFormValues = z.infer<typeof profileSchema>;
 
-export default function EditProfileScreen() {
+export default function EditProfile() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { updateProfile, isUpdatingProfile } = useProfile();
 
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<EditProfileFormValues>({
-    resolver: zodResolver(editProfileSchema),
-    defaultValues: { name: '', age: '', height: '', weight: '', fitnessGoals: '' }
+  const { control, handleSubmit, formState: { errors } } = useForm<any>({
+    resolver: zodResolver(profileSchema) as any,
+    defaultValues: {
+      fullName: user?.fullName || '',
+      age: user?.age || 0,
+      height: user?.height || 0,
+      weight: user?.weight || 0,
+    }
   });
 
-  useEffect(() => {
-    if (user) {
-      setValue('name', user.name || '');
-      setValue('age', user.age?.toString() || '');
-      setValue('height', user.height?.toString() || '');
-      setValue('weight', user.weight?.toString() || '');
-      setValue('fitnessGoals', user.fitnessGoals || '');
-    }
-  }, [user, setValue]);
-
-  const onSubmit = async (data: EditProfileFormValues) => {
+  const onSubmit = async (data: ProfileFormValues) => {
     try {
-      const payload: any = { name: data.name };
-      if (data.age) payload.age = Number(data.age);
-      if (data.height) payload.height = Number(data.height);
-      if (data.weight) payload.weight = Number(data.weight);
-      if (data.fitnessGoals) payload.fitnessGoals = data.fitnessGoals;
-
-      await updateProfile(payload);
-      Alert.alert('Success', 'Profile updated successfully', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
-    } catch (error) {
-      Alert.alert('Error', 'Could not update profile');
+      await updateProfile(data as any);
+      Alert.alert('Success', 'Profile updated successfully');
+      router.back();
+    } catch (e) {
+      Alert.alert('Error', 'Failed to update profile');
     }
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <MaterialIcons name="arrow-back" size={24} color="#0f172a" />
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
+      <View className="flex-row items-center px-4 py-4 bg-gray-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+        <TouchableOpacity onPress={() => router.back()} className="p-2">
+          <MaterialIcons name="arrow-back" size={24} color="#0f172a" className="dark:color-white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Edit Profile</Text>
+        <Text className="text-xl font-bold ml-4 text-slate-900 dark:text-white">Edit Profile</Text>
       </View>
 
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Name</Text>
+      <ScrollView className="p-6">
+        <View className="items-center mb-8">
+          <View className="w-24 h-24 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center border-2 border-blue-600">
+            <MaterialIcons name="person" size={48} color="#94a3b8" />
+          </View>
+          <TouchableOpacity className="mt-2">
+            <Text className="text-blue-600 font-bold">Change Photo</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View className="gap-4">
+          <View>
+            <Text className="text-sm font-semibold text-slate-500 mb-2">Full Name</Text>
             <Controller
               control={control}
-              name="name"
+              name="fullName"
               render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput style={styles.input} onBlur={onBlur} onChangeText={onChange} value={value} />
+                <TextInput
+                  className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                  placeholder="John Doe"
+                  placeholderTextColor="#94a3b8"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value?.toString()}
+                />
               )}
             />
-            {errors.name && <Text style={styles.errorText}>{errors.name.message as string}</Text>}
+            {errors.fullName && <Text className="text-red-500 text-xs mt-1">{errors.fullName.message as string}</Text>}
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Age</Text>
-            <Controller
-              control={control}
-              name="age"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput style={styles.input} keyboardType="numeric" onBlur={onBlur} onChangeText={onChange} value={value} />
-              )}
-            />
+          <View className="flex-row gap-4">
+            <View className="flex-1">
+              <Text className="text-sm font-semibold text-slate-500 mb-2">Age</Text>
+              <Controller
+                control={control}
+                name="age"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                    placeholder="25"
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="numeric"
+                    onBlur={onBlur}
+                    onChangeText={(text) => onChange(Number(text))}
+                    value={value?.toString()}
+                  />
+                )}
+              />
+              {errors.age && <Text className="text-red-500 text-xs mt-1">Invalid age</Text>}
+            </View>
+
+            <View className="flex-1">
+              <Text className="text-sm font-semibold text-slate-500 mb-2">Height (cm)</Text>
+              <Controller
+                control={control}
+                name="height"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                    placeholder="180"
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="numeric"
+                    onBlur={onBlur}
+                    onChangeText={(text) => onChange(Number(text))}
+                    value={value?.toString()}
+                  />
+                )}
+              />
+              {errors.height && <Text className="text-red-500 text-xs mt-1">Invalid height</Text>}
+            </View>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Height (cm)</Text>
-            <Controller
-              control={control}
-              name="height"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput style={styles.input} keyboardType="numeric" onBlur={onBlur} onChangeText={onChange} value={value} />
-              )}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Weight (kg)</Text>
+          <View>
+            <Text className="text-sm font-semibold text-slate-500 mb-2">Weight (kg)</Text>
             <Controller
               control={control}
               name="weight"
               render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput style={styles.input} keyboardType="numeric" onBlur={onBlur} onChangeText={onChange} value={value} />
+                <TextInput
+                  className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                  placeholder="75"
+                  placeholderTextColor="#94a3b8"
+                  keyboardType="numeric"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value?.toString()}
+                />
               )}
             />
-          </View>
-          
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Fitness Goals</Text>
-            <Controller
-              control={control}
-              name="fitnessGoals"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput style={styles.input} onBlur={onBlur} onChangeText={onChange} value={value} />
-              )}
-            />
+            {errors.weight && <Text className="text-red-500 text-xs mt-1">Invalid weight</Text>}
           </View>
 
-          <TouchableOpacity style={styles.saveButton} onPress={handleSubmit(onSubmit)} disabled={isUpdatingProfile}>
-            <Text style={styles.saveButtonText}>{isUpdatingProfile ? 'Saving...' : 'Save Changes'}</Text>
+          <TouchableOpacity 
+            className="w-full bg-blue-600 items-center justify-center py-4 rounded-xl shadow-lg mt-6"
+            onPress={handleSubmit(onSubmit)}
+            disabled={isUpdatingProfile}
+          >
+            {isUpdatingProfile ? <ActivityIndicator color="white" /> : <Text className="text-white font-bold text-lg">Save Changes</Text>}
           </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#f8fafc' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#ffffff', borderBottomWidth: 1, borderBottomColor: '#e2e8f0' },
-  backButton: { marginRight: 16 },
-  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#0f172a' },
-  flex: { flex: 1 },
-  content: { padding: 16 },
-  inputGroup: { marginBottom: 16 },
-  label: { fontSize: 14, fontWeight: '600', color: '#475569', marginBottom: 8 },
-  input: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#cbd5e1', padding: 12, fontSize: 16, color: '#0f172a', borderRadius: 8 },
-  errorText: { color: '#ef4444', fontSize: 12, marginTop: 4 },
-  saveButton: { backgroundColor: '#2563eb', padding: 16, borderRadius: 8, alignItems: 'center', marginTop: 16 },
-  saveButtonText: { color: '#ffffff', fontSize: 16, fontWeight: 'bold' }
-});

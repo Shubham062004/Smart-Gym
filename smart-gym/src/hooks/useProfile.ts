@@ -4,51 +4,38 @@ import { useUserStore } from '../store/userStore';
 
 export const useProfile = () => {
   const queryClient = useQueryClient();
-  const { setProfile, updateProfile: updateStoreProfile, updatePreferences } = useUserStore();
+  const setProfile = useUserStore((state) => state.setProfile);
+  const updateStorePreferences = useUserStore((state) => state.updatePreferences);
 
-  const getProfileQuery = useQuery({
-    queryKey: ['user', 'profile'],
+  const profileQuery = useQuery({
+    queryKey: ['profile'],
     queryFn: async () => {
-      const data = await userService.getProfile();
-      setProfile(data);
-      return data;
+      const profile = await userService.getProfile();
+      setProfile(profile);
+      return profile;
     },
   });
 
   const updateProfileMutation = useMutation({
     mutationFn: userService.updateProfile,
-    onSuccess: (data) => {
-      updateStoreProfile(data);
-      queryClient.invalidateQueries({ queryKey: ['user', 'profile'] });
+    onSuccess: (updatedProfile) => {
+      setProfile(updatedProfile);
+      queryClient.setQueryData(['profile'], updatedProfile);
     },
   });
 
   const updateSettingsMutation = useMutation({
-    mutationFn: async (data: any) => {
-      await userService.updateSettings(data);
-      return data;
+    mutationFn: userService.updateSettings,
+    onSuccess: (updatedSettings) => {
+      updateStorePreferences(updatedSettings);
     },
-    onSuccess: (data) => {
-      updatePreferences(data);
-    },
-  });
-
-  const deleteAccountMutation = useMutation({
-    mutationFn: userService.deleteAccount,
   });
 
   return {
-    profile: getProfileQuery.data,
-    isLoading: getProfileQuery.isLoading,
-    error: getProfileQuery.error,
-
-    updateProfile: updateProfileMutation.mutateAsync,
+    profile: profileQuery.data,
+    isLoadingProfile: profileQuery.isLoading,
+    updateProfile: updateProfileMutation.mutate,
     isUpdatingProfile: updateProfileMutation.isPending,
-
-    updateSettings: updateSettingsMutation.mutateAsync,
-    isUpdatingSettings: updateSettingsMutation.isPending,
-
-    deleteAccount: deleteAccountMutation.mutateAsync,
-    isDeletingAccount: deleteAccountMutation.isPending,
+    updateSettings: updateSettingsMutation.mutate,
   };
 };

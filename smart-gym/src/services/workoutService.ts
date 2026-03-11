@@ -1,23 +1,27 @@
 import axiosClient from '../api/axiosClient';
+import { Workout, Exercise } from '../types/apiTypes';
 
 export const workoutService = {
-  getToday: async () => {
+  getTodayWorkout: async (): Promise<Workout> => {
     const response = await axiosClient.get('/workout/today');
     return response.data;
   },
-  start: async (workoutId: string) => {
-    const response = await axiosClient.post('/workout/start', { workoutId });
-    return response.data;
+
+  startWorkout: async (workoutId: string): Promise<void> => {
+    await axiosClient.post('/workout/start', { workoutId });
   },
-  complete: async (workoutData: any) => {
+
+  completeWorkout: async (workoutData: Partial<Workout>): Promise<Workout> => {
     const response = await axiosClient.post('/workout/complete', workoutData);
     return response.data;
   },
-  getHistory: async () => {
+
+  getWorkoutHistory: async (): Promise<Workout[]> => {
     const response = await axiosClient.get('/workout/history');
     return response.data;
   },
-  searchExercises: async (query: string) => {
+
+  searchExercises: async (query: string): Promise<Exercise[]> => {
     const response = await axiosClient.get(`/exercises?search=${query}`);
     return response.data;
   }

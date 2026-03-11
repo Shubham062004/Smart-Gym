@@ -1,41 +1,57 @@
 import { useMutation } from '@tanstack/react-query';
 import { authService } from '../services/authService';
 import { useAuthStore } from '../store/authStore';
+import { useRouter } from 'expo-router';
 
 export const useAuth = () => {
-  const { login: storeLogin, logout: storeLogout } = useAuthStore();
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const logoutStore = useAuthStore((state) => state.logout);
+  const router = useRouter();
 
   const loginMutation = useMutation({
     mutationFn: authService.login,
     onSuccess: (data) => {
-      storeLogin(data.user, data.token);
+      setAuth(data.user, data.token);
+      router.replace('/(tabs)');
     },
   });
 
   const registerMutation = useMutation({
     mutationFn: authService.register,
     onSuccess: (data) => {
-      storeLogin(data.user, data.token);
+      setAuth(data.user, data.token);
+      router.replace('/(tabs)');
     },
   });
 
-  const logoutMutation = useMutation({
-    mutationFn: authService.logout,
-    onSettled: () => {
-      storeLogout();
+  const verifyOtpMutation = useMutation({
+    mutationFn: authService.verifyOtp,
+    onSuccess: (data) => {
+      setAuth(data.user, data.token);
+      router.replace('/(tabs)');
     },
   });
+
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (e) {
+      console.error('Logout error', e);
+    } finally {
+      await logoutStore();
+      router.replace('/login' as any);
+    }
+  };
 
   return {
-    login: loginMutation.mutateAsync,
+    login: loginMutation.mutate,
     isLoggingIn: loginMutation.isPending,
     loginError: loginMutation.error,
-    
-    register: registerMutation.mutateAsync,
+    register: registerMutation.mutate,
     isRegistering: registerMutation.isPending,
     registerError: registerMutation.error,
-    
-    logout: logoutMutation.mutateAsync,
-    isLoggingOut: logoutMutation.isPending,
+    verifyOtp: verifyOtpMutation.mutate,
+    isVerifying: verifyOtpMutation.isPending,
+    logout,
   };
 };

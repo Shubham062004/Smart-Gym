@@ -26,12 +26,18 @@ const { width, height } = Dimensions.get('window');
 
 const signupSchema = z.object({
   name: z.string().min(2, 'Name is required'),
-  email: z.string().email('Please enter a valid email'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  email: z.string().min(5, 'Please enter a valid email or phone'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[a-z]/, 'Password must contain one lowercase letter')
+    .regex(/[A-Z]/, 'Password must contain one uppercase letter')
+    .regex(/[0-9]/, 'Password must contain one number')
+    .refine(val => !/(\d)\1/.test(val), 'Password must not contain repeating numbers'),
   confirmPassword: z.string(),
   age: z.string().optional(),
   height: z.string().optional(),
   weight: z.string().optional(),
+  goal: z.string().optional(),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword']
@@ -51,7 +57,7 @@ export default function SignUpScreen() {
         formState: { errors },
     } = useHookForm<SignupFormValues>({
         resolver: zodResolver(signupSchema),
-        defaultValues: { name: '', email: '', password: '', confirmPassword: '', age: '', height: '', weight: '' }
+        defaultValues: { name: '', email: '', password: '', confirmPassword: '', age: '', height: '', weight: '', goal: '' }
     });
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -138,7 +144,7 @@ export default function SignUpScreen() {
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Email</Text>
+                            <Text style={styles.label}>Email or Phone</Text>
                             <View style={[styles.inputWrapper, errors.email && styles.inputWrapperError]}>
                                 <MaterialIcons name="alternate-email" size={20} color="#64748b" style={styles.inputIcon} />
                                 <Controller
@@ -147,7 +153,7 @@ export default function SignUpScreen() {
                                     render={({ field: { onChange, onBlur, value } }) => (
                                       <TextInput
                                           style={styles.input}
-                                          placeholder="email@example.com"
+                                          placeholder="Email or phone number"
                                           placeholderTextColor="#64748b"
                                           keyboardType="email-address"
                                           autoCapitalize="none"
@@ -224,6 +230,28 @@ export default function SignUpScreen() {
                         )}
 
                         <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Fitness Goal</Text>
+                            <View style={[styles.inputWrapper, errors.goal && styles.inputWrapperError]}>
+                                <MaterialIcons name="flag" size={20} color="#64748b" style={styles.inputIcon} />
+                                <Controller
+                                    control={control}
+                                    name="goal"
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                      <TextInput
+                                          style={styles.input}
+                                          placeholder="e.g. Lose Weight, Build Muscle"
+                                          placeholderTextColor="#64748b"
+                                          onBlur={onBlur}
+                                          onChangeText={onChange}
+                                          value={value}
+                                      />
+                                    )}
+                                />
+                            </View>
+                            {errors.goal && <Text style={styles.errorText}>{errors.goal.message as string}</Text>}
+                        </View>
+
+                        <View style={styles.inputGroup}>
                             <Text style={styles.label}>Password</Text>
                             <View style={[styles.inputWrapper, errors.password && styles.inputWrapperError]}>
                                 <MaterialIcons name="lock" size={20} color="#64748b" style={styles.inputIcon} />
@@ -268,6 +296,9 @@ export default function SignUpScreen() {
                                       />
                                     )}
                                 />
+                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIconWrapper}>
+                                    <MaterialIcons name={showPassword ? "visibility" : "visibility-off"} size={20} color="#64748b" />
+                                </TouchableOpacity>
                             </View>
                             {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword.message as string}</Text>}
                         </View>

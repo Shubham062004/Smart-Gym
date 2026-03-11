@@ -1,50 +1,24 @@
 import { create } from 'zustand';
-import { User, UserPreferences } from '../types/apiTypes';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import * as SecureStore from 'expo-secure-store';
-
-const secureStorage = {
-  getItem: async (name: string): Promise<string | null> => {
-    return await SecureStore.getItemAsync(name);
-  },
-  setItem: async (name: string, value: string): Promise<void> => {
-    await SecureStore.setItemAsync(name, value);
-  },
-  removeItem: async (name: string): Promise<void> => {
-    await SecureStore.deleteItemAsync(name);
-  },
-};
+import { User, UserSettings } from '../types/apiTypes';
 
 interface UserState {
   profile: User | null;
-  preferences: UserPreferences;
+  preferences: UserSettings;
   setProfile: (profile: User) => void;
-  updateProfile: (data: Partial<User>) => void;
-  updatePreferences: (data: Partial<UserPreferences>) => void;
+  updatePreferences: (settings: Partial<UserSettings>) => void;
 }
 
-const defaultPreferences: UserPreferences = {
-  darkMode: false,
+const defaultSettings: UserSettings = {
+  darkMode: true,
   notifications: true,
   voiceFeedback: true,
+  units: 'metric',
 };
 
-export const useUserStore = create<UserState>()(
-  persist(
-    (set) => ({
-      profile: null,
-      preferences: defaultPreferences,
-      setProfile: (profile) => set({ profile }),
-      updateProfile: (data) => set((state) => ({ 
-        profile: state.profile ? { ...state.profile, ...data } : null 
-      })),
-      updatePreferences: (data) => set((state) => ({
-        preferences: { ...state.preferences, ...data }
-      })),
-    }),
-    {
-      name: 'user-storage',
-      storage: createJSONStorage(() => secureStorage),
-    }
-  )
-);
+export const useUserStore = create<UserState>((set) => ({
+  profile: null,
+  preferences: defaultSettings,
+  setProfile: (profile) => set({ profile }),
+  updatePreferences: (newSettings) =>
+    set((state) => ({ preferences: { ...state.preferences, ...newSettings } })),
+}));

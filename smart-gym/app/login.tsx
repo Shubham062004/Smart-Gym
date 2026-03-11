@@ -25,7 +25,7 @@ import { useAuth } from '../src/hooks/useAuth';
 const { width, height } = Dimensions.get('window');
 
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email'),
+  email: z.string().min(5, 'Please enter a valid email or phone'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
@@ -114,7 +114,7 @@ export default function LoginScreen() {
                             <Text style={styles.formTitle}>Welcome Back</Text>
 
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Email</Text>
+                                <Text style={styles.label}>Email or Phone</Text>
                                 <View style={[styles.inputWrapper, errors.email && styles.inputWrapperError]}>
                                     <MaterialIcons name="mail" size={20} color="#64748b" style={styles.inputIcon} />
                                     <Controller
@@ -123,7 +123,7 @@ export default function LoginScreen() {
                                       render={({ field: { onChange, onBlur, value } }) => (
                                         <TextInput
                                             style={styles.input}
-                                            placeholder="Email address"
+                                            placeholder="Email or phone number"
                                             placeholderTextColor="#64748b"
                                             keyboardType="email-address"
                                             autoCapitalize="none"
@@ -174,17 +174,6 @@ export default function LoginScreen() {
                                 {!isLoggingIn && <MaterialIcons name="arrow-forward" size={20} color="#fff" />}
                             </TouchableOpacity>
                         </View>
-
-                        <View style={styles.dividerContainer}>
-                            <View style={styles.dividerLine} />
-                            <Text style={styles.dividerText}>OR</Text>
-                            <View style={styles.dividerLine} />
-                        </View>
-
-                        <TouchableOpacity style={styles.googleButton} onPress={() => Alert.alert('Google Sign-In', 'Google sign-in flow will be coming soon!')}>
-                            <GoogleIcon />
-                            <Text style={styles.googleButtonText}>Continue with Google</Text>
-                        </TouchableOpacity>
 
                         <View style={styles.signupContainer}>
                             <Text style={styles.signupText}>Don't have an account? </Text>

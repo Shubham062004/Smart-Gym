@@ -1,61 +1,99 @@
-import { useEffect, useState } from 'react';
-import { router, Stack, Slot } from 'expo-router';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
+import { Stack, useRouter, useSegments } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import React, { useEffect } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import * as SecureStore from 'expo-secure-store';
 import { useAuthStore } from '../src/store/authStore';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
-export const unstable_settings = {
-  initialRouteName: 'index',
-};
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-function InitialLayout() {
-  const colorScheme = useColorScheme();
-  const { token } = useAuthStore();
-  const [isReady, setIsReady] = useState(false);
+function useProtectedRoute(user: any) {
+  const segments = useSegments();
+  const router = useRouter();
 
   useEffect(() => {
-    // Wait for the navigation tree to be ready
-    setIsReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isReady) return;
+    const inTabsGroup = segments[0] === '(tabs)';
     
-    // Auth guard
-    if (token) {
+    // Check if user is on authentication pages
+    const isAuthPage = ['login', 'signup', 'verify-otp', 'onboarding1', 'onboarding2', 'onboarding3', 'index'].includes(segments[0] || '');
+
+    if (!user && inTabsGroup) {
+      // If not authenticated and trying to access tabs, redirect to login
+      router.replace('/login' as any);
+    } else if (user && isAuthPage) {
+      // If authenticated and on auth pages, redirect to tabs
       router.replace('/(tabs)');
     }
-  }, [token, isReady]);
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding1" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding2" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding3" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="signup" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="settings" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+  }, [user, segments]);
 }
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme();
+  const [loaded] = useFonts({
+    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+  });
+
+  const { isAuthenticated, setAuth } = useAuthStore();
+  
+  useEffect(() => {
+    async function checkAuth() {
+      const token = await SecureStore.getItemAsync('userToken');
+      // In a real app, you'd fetch the user profile here with the token
+      if (token) {
+        // Mocking user data for now since we don't have the backend call results yet
+        // In a real implementation, you'd call userService.getProfile()
+        setAuth({ id: '1', email: 'user@example.com' } as any, token);
+      }
+    }
+    checkAuth();
+  }, []);
+
+  useProtectedRoute(isAuthenticated);
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
+
+  if (!loaded) {
+    return null;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
-      <InitialLayout />
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <StackScreen />
+        <StatusBar style="auto" />
+      </ThemeProvider>
     </QueryClientProvider>
+  );
+}
+
+function StackScreen() {
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="onboarding1" />
+      <Stack.Screen name="onboarding2" />
+      <Stack.Screen name="onboarding3" />
+      <Stack.Screen name="login" />
+      <Stack.Screen name="signup" />
+      <Stack.Screen name="verify-otp" />
+      <Stack.Screen name="edit-profile" />
+      <Stack.Screen name="forgot-password" />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="settings" options={{ headerShown: true, title: 'Settings' }} />
+      <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+    </Stack>
   );
 }

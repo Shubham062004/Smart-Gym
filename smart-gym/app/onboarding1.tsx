@@ -58,9 +58,6 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({
 
         {/* Top Navigation */}
         <View style={styles.topNav}>
-          <TouchableOpacity onPress={onSkip} activeOpacity={0.7}>
-            <Text style={styles.skipText}>Skip</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Main Content Area */}

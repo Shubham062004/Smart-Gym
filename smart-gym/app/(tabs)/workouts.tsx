@@ -7,9 +7,7 @@ import { useWorkout } from '../../src/hooks/useWorkout';
 export default function Workouts() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const { searchExercises, startWorkout } = useWorkout();
-  
-  const { data: searchResults, isLoading: isSearching } = searchExercises(searchQuery);
+  const { searchResults, isSearching, startWorkout } = useWorkout(searchQuery);
 
   const handleStartWorkout = async (workoutId: string) => {
     try {
@@ -74,121 +72,54 @@ export default function Workouts() {
         </TouchableOpacity>
 
         <View className="h-px bg-slate-200 dark:bg-slate-800 my-2" />
-        <Text className="text-slate-900 dark:text-white text-base font-bold px-1 mb-4">Today's Plan</Text>
+        <Text className="text-slate-900 dark:text-white text-base font-bold px-1 mb-4">
+          {searchQuery ? 'Search Results' : "Today's Plan"}
+        </Text>
 
-        {/* Card 1: Pushups */}
-        <TouchableOpacity className="flex-row items-stretch gap-4 rounded-xl bg-white dark:bg-slate-800 p-3 shadow-sm border border-slate-100 dark:border-slate-700 mb-4">
-          <ImageBackground 
-            source={{ uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuCiJ7CD95YwRVabTp4Z-8hYYVm-WZPYq-PkeUGK3yT7Mqez_k0rqRhjq2Q5F3MczC4aOQOsNCLJdc3KmRic0tmcR7iYQJ0SMq46ANn_x0BSOgazjXtPl8fGcFSB0VagmhZ0VGXjTORbOoEz32_rqoE4AblOIEiDSpEXa25MT2OEEYzzoSJ4a61Qu7Tgs9anNOOXKnvi7DcM9CpQVy8pECKuB4FGNeC43bivUyf4o-jna7ZEoiQq1mBs30Usn7wUlb8hysEgsHAIbSs" }} 
-            className="w-24 h-32 rounded-lg overflow-hidden shrink-0"
-            resizeMode="cover"
-          >
-            <View className="absolute inset-0 bg-black/20" />
-          </ImageBackground>
-          <View className="flex-1 justify-between py-1">
-            <View className="flex-row justify-between items-start">
-              <View>
-                <Text className="text-slate-900 dark:text-white text-lg font-bold">Pushups</Text>
-                <View className="flex-row items-center gap-2 mt-1">
-                  <Text className="text-slate-500 text-sm">Beginner</Text>
-                  <Text className="text-slate-500 text-xs">•</Text>
-                  <Text className="text-slate-500 text-sm">5 mins</Text>
+        {(searchQuery ? searchResults : [
+          { id: 'pushups', name: 'Pushups', difficulty: 'Beginner', duration: '5 mins', image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCiJ7CD95YwRVabTp4Z-8hYYVm-WZPYq-PkeUGK3yT7Mqez_k0rqRhjq2Q5F3MczC4aOQOsNCLJdc3KmRic0tmcR7iYQJ0SMq46ANn_x0BSOgazjXtPl8fGcFSB0VagmhZ0VGXjTORbOoEz32_rqoE4AblOIEiDSpEXa25MT2OEEYzzoSJ4a61Qu7Tgs9anNOOXKnvi7DcM9CpQVy8pECKuB4FGNeC43bivUyf4o-jna7ZEoiQq1mBs30Usn7wUlb8hysEgsHAIbSs" },
+          { id: 'squats', name: 'Squats', difficulty: 'Intermediate', duration: '8 mins', image: "https://lh3.googleusercontent.com/aida-public/AB6AXuANtir1XsX_fl5X4u5DpB0RxPDKMf772MXl-y7k7G6198Kmru9oLZtoNE8ii6eJjhhnN3AdKUgTjc945XNRpX54VvGqDsz8PEXTg9Y2mkLsGL7vGNsSOb9qJHcx7qGzYJTBq0BpF2cmSORlAyYSPYjVTw_KLAI4U8J-Yzu9RrJfs0m74LT5GBq4lpIcUGot2LRixPg7zEU2-Ww18xzHAODf9WDmrqJEuXPYJ3FM4IgODP5APowlMsnX3twpDsWwNBz_fLuVBB0-xtg" },
+          { id: 'planks', name: 'Planks', difficulty: 'Beginner', duration: '3 mins', image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCCXk7RoVIT4sAgLzxeUVkbJ2TzL3Y_JOvphgn9FZxwlSf59uE4kstaoeD3F8geZ-bE6rY-h8Iq49KgikBOJsGG5MkyMVewJZpueGuabwfkdTebNcgTZauQjo1gi5U4nr2MMn-gmwD7gd6CUGMsD8HJu0-SgDLeeBvWLaHPDOu0Plf5sHLTQFgaHzQOgUzThGW2BBJDBkmfnksyJ-UXIHZR2qFM2jgCWPVtexZh74WJIg_9nDxOCMDiHIh6gIJKgf3w8RnZJfg-L5A" }
+        ]).map((item: any) => (
+          <TouchableOpacity key={item.id} className="flex-row items-stretch gap-4 rounded-xl bg-white dark:bg-slate-800 p-3 shadow-sm border border-slate-100 dark:border-slate-700 mb-4">
+            <ImageBackground 
+              source={{ uri: item.image || item.imageUrl }} 
+              className="w-24 h-32 rounded-lg overflow-hidden shrink-0"
+              resizeMode="cover"
+            >
+              <View className="absolute inset-0 bg-black/20" />
+            </ImageBackground>
+            <View className="flex-1 justify-between py-1">
+              <View className="flex-row justify-between items-start">
+                <View>
+                  <Text className="text-slate-900 dark:text-white text-lg font-bold">{item.name}</Text>
+                  <View className="flex-row items-center gap-2 mt-1">
+                    <Text className="text-slate-500 text-sm">{item.difficulty}</Text>
+                    <Text className="text-slate-500 text-xs">•</Text>
+                    <Text className="text-slate-500 text-sm">{item.duration}{typeof item.duration === 'number' ? ' mins' : ''}</Text>
+                  </View>
+                </View>
+                <View className="bg-indigo-100 dark:bg-indigo-500/20 px-2 py-1 rounded border border-indigo-200 dark:border-indigo-500/20 flex-row items-center gap-1">
+                  <MaterialIcons name="smart-toy" size={12} color="#4f46e5" />
+                  <Text className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">AI Tracked</Text>
                 </View>
               </View>
-              <View className="bg-indigo-100 dark:bg-indigo-500/20 px-2 py-1 rounded border border-indigo-200 dark:border-indigo-500/20 flex-row items-center gap-1">
-                <MaterialIcons name="smart-toy" size={12} color="#4f46e5" />
-                <Text className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">AI Tracked</Text>
-              </View>
-            </View>
-            <View className="flex-row items-end justify-between mt-3">
-              <View className="flex-row -space-x-2">
-                <View className="w-6 h-6 rounded-full bg-slate-700 border-2 border-white flex items-center justify-center"><Text className="text-[8px] text-white">JD</Text></View>
-                <View className="w-6 h-6 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center"><Text className="text-[8px] text-white">+3</Text></View>
-              </View>
-              <TouchableOpacity 
-                className="flex-row items-center justify-center rounded-full h-9 px-5 bg-blue-600 text-white gap-2 shadow-lg"
-                onPress={() => handleStartWorkout('pushups')}
-              >
-                <MaterialIcons name="play-arrow" size={18} color="white" />
-                <Text className="text-white text-sm font-medium">Start</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableOpacity>
-
-        {/* Card 2: Squats */}
-        <TouchableOpacity className="flex-row items-stretch gap-4 rounded-xl bg-white dark:bg-slate-800 p-3 shadow-sm border border-slate-100 dark:border-slate-700 mb-4">
-          <ImageBackground 
-            source={{ uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuANtir1XsX_fl5X4u5DpB0RxPDKMf772MXl-y7k7G6198Kmru9oLZtoNE8ii6eJjhhnN3AdKUgTjc945XNRpX54VvGqDsz8PEXTg9Y2mkLsGL7vGNsSOb9qJHcx7qGzYJTBq0BpF2cmSORlAyYSPYjVTw_KLAI4U8J-Yzu9RrJfs0m74LT5GBq4lpIcUGot2LRixPg7zEU2-Ww18xzHAODf9WDmrqJEuXPYJ3FM4IgODP5APowlMsnX3twpDsWwNBz_fLuVBB0-xtg" }} 
-            className="w-24 h-32 rounded-lg overflow-hidden shrink-0"
-            resizeMode="cover"
-          >
-            <View className="absolute inset-0 bg-black/20" />
-          </ImageBackground>
-          <View className="flex-1 justify-between py-1">
-            <View className="flex-row justify-between items-start">
-              <View>
-                <Text className="text-slate-900 dark:text-white text-lg font-bold">Squats</Text>
-                <View className="flex-row items-center gap-2 mt-1">
-                  <Text className="text-slate-500 text-sm">Intermediate</Text>
-                  <Text className="text-slate-500 text-xs">•</Text>
-                  <Text className="text-slate-500 text-sm">8 mins</Text>
+              <View className="flex-row items-end justify-between mt-3">
+                <View className="flex-row -space-x-2">
+                  <View className="w-6 h-6 rounded-full bg-slate-700 border-2 border-white flex items-center justify-center"><Text className="text-[8px] text-white">JD</Text></View>
+                  <View className="w-6 h-6 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center"><Text className="text-[8px] text-white">+3</Text></View>
                 </View>
-              </View>
-              <View className="bg-indigo-100 dark:bg-indigo-500/20 px-2 py-1 rounded border border-indigo-200 dark:border-indigo-500/20 flex-row items-center gap-1">
-                <MaterialIcons name="smart-toy" size={12} color="#4f46e5" />
-                <Text className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">AI Tracked</Text>
-              </View>
-            </View>
-            <View className="flex-row items-end justify-between mt-3">
-              <View className="flex-row"></View>
-              <TouchableOpacity 
-                className="flex-row items-center justify-center rounded-full h-9 px-5 bg-blue-600 text-white gap-2 shadow-lg"
-                onPress={() => handleStartWorkout('squats')}
-              >
-                <MaterialIcons name="play-arrow" size={18} color="white" />
-                <Text className="text-white text-sm font-medium">Start</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableOpacity>
-        
-        {/* Planks */}
-        <TouchableOpacity className="flex-row items-stretch gap-4 rounded-xl bg-white dark:bg-slate-800 p-3 shadow-sm border border-slate-100 dark:border-slate-700 mb-4">
-          <ImageBackground 
-            source={{ uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuCCXk7RoVIT4sAgLzxeUVkbJ2TzL3Y_JOvphgn9FZxwlSf59uE4kstaoeD3F8geZ-bE6rY-h8Iq49KgikBOJsGG5MkyMVewJZpueGuabwfkdTebNcgTZauQjo1gi5U4nr2MMn-gmwD7gd6CUGMsD8HJu0-SgDLeeBvWLaHPDOu0Plf5sHLTQFgaHzQOgUzThGW2BBJDBkmfnksyJ-UXIHZR2qFM2jgCWPVtexZh74WJIg_9nDxOCMDiHIh6gIJKgf3w8RnZJfg-L5A" }} 
-            className="w-24 h-32 rounded-lg overflow-hidden shrink-0"
-            resizeMode="cover"
-          >
-            <View className="absolute inset-0 bg-black/20" />
-          </ImageBackground>
-          <View className="flex-1 justify-between py-1">
-            <View className="flex-row justify-between items-start">
-              <View>
-                <Text className="text-slate-900 dark:text-white text-lg font-bold">Planks</Text>
-                <View className="flex-row items-center gap-2 mt-1">
-                  <Text className="text-slate-500 text-sm">Beginner</Text>
-                  <Text className="text-slate-500 text-xs">•</Text>
-                  <Text className="text-slate-500 text-sm">3 mins</Text>
-                </View>
-              </View>
-              <View className="bg-indigo-100 dark:bg-indigo-500/20 px-2 py-1 rounded border border-indigo-200 dark:border-indigo-500/20 flex-row items-center gap-1">
-                <MaterialIcons name="smart-toy" size={12} color="#4f46e5" />
-                <Text className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">AI Tracked</Text>
+                <TouchableOpacity 
+                  className="flex-row items-center justify-center rounded-full h-9 px-5 bg-blue-600 text-white gap-2 shadow-lg"
+                  onPress={() => handleStartWorkout(item.id)}
+                >
+                  <MaterialIcons name="play-arrow" size={18} color="white" />
+                  <Text className="text-white text-sm font-medium">Start</Text>
+                </TouchableOpacity>
               </View>
             </View>
-            <View className="flex-row items-end justify-between mt-3">
-              <View className="flex-row"></View>
-              <TouchableOpacity 
-                className="flex-row items-center justify-center rounded-full h-9 px-5 bg-blue-600 text-white gap-2 shadow-lg"
-                onPress={() => handleStartWorkout('planks')}
-              >
-                <MaterialIcons name="play-arrow" size={18} color="white" />
-                <Text className="text-white text-sm font-medium">Start</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        ))}
 
       </ScrollView>
     </SafeAreaView>
