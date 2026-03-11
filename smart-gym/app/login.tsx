@@ -21,6 +21,11 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '../src/hooks/useAuth';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import * as AuthSession from 'expo-auth-session';
+
+WebBrowser.maybeCompleteAuthSession();
 
 const { width, height } = Dimensions.get('window');
 
@@ -44,8 +49,32 @@ const iconStyles = StyleSheet.create({
 
 export default function LoginScreen() {
     const router = useRouter();
-    const { login, isLoggingIn } = useAuth();
+    const { login, isLoggingIn, googleLogin, isGoogleLoggingIn } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
+
+    const redirectUri = AuthSession.makeRedirectUri();
+
+    const [request, response, promptAsync] = Google.useAuthRequest({
+        webClientId: "688334401903-ec00cbeekct22ltjgvn7bnv6tjvs9p35.apps.googleusercontent.com",
+        iosClientId: "688334401903-ec00cbeekct22ltjgvn7bnv6tjvs9p35.apps.googleusercontent.com",
+        androidClientId: "688334401903-ec00cbeekct22ltjgvn7bnv6tjvs9p35.apps.googleusercontent.com",
+        redirectUri
+    });
+
+    useEffect(() => {
+        console.log("GOOGLE_REDIRECT_URI_TO_WHITELIST:", redirectUri);
+    }, [redirectUri]);
+
+    useEffect(() => {
+        if (response?.type === 'success') {
+            const { id_token } = response.params;
+            if (id_token) {
+                googleLogin(id_token).catch((err: any) => {
+                    Alert.alert("Google Login Failed", err?.response?.data?.message || "Something went wrong");
+                });
+            }
+        }
+    }, [response]);
 
     const {
         control,
@@ -91,7 +120,7 @@ export default function LoginScreen() {
                             <View style={styles.logoBox}>
                                 <MaterialIcons name="fitness-center" size={48} color="#ffffff" />
                             </View>
-                            <Text style={styles.mainTitle}>Smart GYM</Text>
+                            <Text style={styles.mainTitle}>OnlyFitness</Text>
                             <Text style={styles.subTitle}>Your personal AI trainer</Text>
                         </View>
 
@@ -174,7 +203,23 @@ export default function LoginScreen() {
                             </TouchableOpacity>
                         </View>
 
+                        <View style={styles.dividerContainer}>
+                            <View style={styles.dividerLine} />
+                            <Text style={styles.dividerText}>or continue with</Text>
+                            <View style={styles.dividerLine} />
+                        </View>
+
+                        <TouchableOpacity 
+                            style={styles.googleButton} 
+                            onPress={() => promptAsync()} 
+                            disabled={!request || isGoogleLoggingIn}
+                        >
+                            <GoogleIcon />
+                            <Text style={styles.googleButtonText}>{isGoogleLoggingIn ? "Loading..." : "Continue with Google"}</Text>
+                        </TouchableOpacity>
+
                         <View style={styles.signupContainer}>
+
                             <Text style={styles.signupText}>Don't have an account? </Text>
                             <TouchableOpacity onPress={() => router.push('/signup')}>
                                 <Text style={styles.signupLink}>Sign up</Text>

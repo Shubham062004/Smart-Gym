@@ -32,6 +32,14 @@ export const useAuth = () => {
     },
   });
 
+  const googleLoginMutation = useMutation({
+    mutationFn: authService.googleAuth,
+    onSuccess: (data) => {
+      setAuth(data.user, data.token);
+      router.replace('/(tabs)');
+    },
+  });
+
   const logout = async () => {
     try {
       await authService.logout();
@@ -52,6 +60,8 @@ export const useAuth = () => {
     registerError: registerMutation.error,
     verifyOtp: verifyOtpMutation.mutateAsync,
     isVerifying: verifyOtpMutation.isPending,
+    googleLogin: googleLoginMutation.mutateAsync,
+    isGoogleLoggingIn: googleLoginMutation.isPending,
     logout,
   };
 };

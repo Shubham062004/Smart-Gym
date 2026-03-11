@@ -1,80 +1,45 @@
-import { Request, Response, NextFunction } from 'express';
-import User from '../models/User';
-import generateToken from '../utils/generateToken';
-import Joi from 'joi';
-import sendEmail from '../utils/sendEmail';
-import { AuthRequest } from '../middleware/authMiddleware';
+import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
+import { findUserByEmail, createUser, saveOtp, verifyUserOtp, resetUserPassword } from '../services/authService';
+import { generateOtp, sendOtpEmail } from '../services/otpService';
+import { generateToken } from '../utils/jwt';
+import { validatePassword } from '../utils/passwordValidator';
 
-// Joi Schemas for Validation
-const signupSchema = Joi.object({
-    name: Joi.string().required(),
-    email: Joi.string().email().required(),
-    password: Joi.string()
-        .min(8)
-        .pattern(/[a-z]/)
-        .pattern(/[A-Z]/)
-        .pattern(/[0-9]/)
-        .pattern(/^(?!.*(\d)\1).*$/)
-        .required(),
-    age: Joi.number().optional(),
-    height: Joi.number().optional(),
-    weight: Joi.number().optional(),
-    goal: Joi.string().optional()
-});
-
-const loginSchema = Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().required()
-});
-
-const forgotPasswordSchema = Joi.object({
-    email: Joi.string().email().required()
-});
-
-const resetPasswordSchema = Joi.object({
-    email: Joi.string().email().required(),
-    otp: Joi.string().length(4).required(),
-    newPassword: Joi.string()
-        .min(8)
-        .pattern(/[a-z]/)
-        .pattern(/[A-Z]/)
-        .pattern(/[0-9]/)
-        .pattern(/^(?!.*(\d)\1).*$/)
-        .required()
-});
-
-const verifyOtpSchema = Joi.object({
-    email: Joi.string().email().required(),
-    otp: Joi.string().length(4).required()
-});
-
-export const signup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const register = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { error } = signupSchema.validate(req.body);
-        if (error) {
-            res.status(400).json({ message: error.details[0].message });
+        const { name, email, password, age, height, weight, goal } = req.body;
+
+        if (!name || !email || !password) {
+             res.status(400).json({ message: 'Name, email, and password are required' });
+             return;
+        }
+
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.isValid) {
+            res.status(400).json({ message: passwordValidation.error });
             return;
         }
 
-        const { name, email, password, age, height, weight, goal } = req.body;
-
-        const userExists = await User.findOne({ email });
-        if (userExists) {
+        const existingUser = await findUserByEmail(email);
+        if (existingUser) {
             res.status(400).json({ message: 'User already exists' });
             return;
         }
 
-        const user = await User.create({
+        const user = await createUser({
             name,
             email,
             password,
-            age: age ? parseInt(age) : undefined,
-            height: height ? parseFloat(height) : undefined,
-            weight: weight ? parseFloat(weight) : undefined,
-            fitness_goal: goal,
+            age,
+            height,
+            weight,
+            goal
         });
 
+        const token = generateToken(user._id.toString(), user.email);
+
         res.status(201).json({
+            message: 'User registered successfully',
             user: {
                 id: user._id,
                 name: user.name,
@@ -84,157 +49,181 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
                 weight: user.weight,
                 fitness_goal: user.fitness_goal,
             },
-            token: generateToken(user._id.toString()),
+            token
         });
     } catch (error) {
-        next(error);
+        console.error('Register error:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
-export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const login = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { error } = loginSchema.validate(req.body);
-        if (error) {
-             res.status(400).json({ message: error.details[0].message });
-             return;
-        }
-
         const { email, password } = req.body;
-        const user = await User.findOne({ email });
 
-        if (user && (await user.matchPassword(password))) {
-            res.json({
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                },
-                token: generateToken(user._id.toString()),
-            });
-        } else {
+        if (!email || !password) {
+            res.status(400).json({ message: 'Email and password are required' });
+            return;
+        }
+
+        const user = await findUserByEmail(email);
+        if (!user) {
             res.status(401).json({ message: 'Invalid email or password' });
-        }
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const getProfile = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        if (!req.user) {
-            res.status(404).json({ message: 'User not found' });
             return;
         }
 
-        const user = await User.findById(req.user._id).select('-password');
-
-        if (user) {
-            res.json(user);
-        } else {
-            res.status(404).json({ message: 'User not found' });
-        }
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const { error } = forgotPasswordSchema.validate(req.body);
-        if (error) {
-            res.status(400).json({ message: error.details[0].message });
+        const isMatch = await bcrypt.compare(password, user.password as string);
+        if (!isMatch) {
+            res.status(401).json({ message: 'Invalid email or password' });
             return;
         }
 
-        const { email } = req.body;
-        const user = await User.findOne({ email });
-        
-        if (!user) {
-            res.status(404).json({ message: 'User not found' });
-            return;
-        }
+        const token = generateToken(user._id.toString(), user.email);
 
-        const otp = Math.floor(1000 + Math.random() * 9000).toString();
-        
-        user.otp_code = otp;
-        user.otp_expires_at = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-        await user.save({ validateBeforeSave: false });
-
-        const message = `Your password reset OTP is ${otp}. This code will expire in 10 minutes.`;
-
-        try {
-            await sendEmail({
+        res.status(200).json({
+            message: 'Logged in successfully',
+            user: {
+                id: user._id,
+                name: user.name,
                 email: user.email,
-                subject: 'OnlyFitness Password Reset',
-                message
-            });
-            res.status(200).json({ message: 'OTP sent to your email.' }); 
-        } catch (err) {
-            console.error(err);
-            user.otp_code = undefined;
-            user.otp_expires_at = undefined;
-            await user.save({ validateBeforeSave: false });
-            res.status(500).json({ message: 'Email could not be sent' });
-        }
+            },
+            token
+        });
     } catch (error) {
-        next(error);
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
-export const verifyOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { error } = verifyOtpSchema.validate(req.body);
-        if (error) {
-            res.status(400).json({ message: error.details[0].message });
+        const { email } = req.body;
+        
+        if (!email) {
+            res.status(400).json({ message: 'Email is required' });
             return;
         }
 
-        const { email, otp } = req.body;
-        const user = await User.findOne({ 
-            email,
-            otp_code: otp,
-            otp_expires_at: { $gt: Date.now() }
-        });
-
+        const user = await findUserByEmail(email);
         if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        const otp = generateOtp();
+        await saveOtp(email, otp, 10);
+        await sendOtpEmail(email, otp);
+
+        res.status(200).json({ message: 'OTP sent to your email.' });
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const verifyOtp = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            res.status(400).json({ message: 'Email and OTP are required' });
+            return;
+        }
+
+        const isValid = await verifyUserOtp(email, otp);
+        if (!isValid) {
             res.status(400).json({ message: 'Invalid or expired OTP' });
             return;
         }
 
         res.status(200).json({ message: 'OTP verified successfully' });
     } catch (error) {
-        next(error);
+        console.error('Verify OTP error:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
-export const resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { error } = resetPasswordSchema.validate(req.body);
-        if (error) {
-            res.status(400).json({ message: error.details[0].message });
+        const { email, newPassword, otp } = req.body;
+
+        if (!email || !newPassword || !otp) {
+            res.status(400).json({ message: 'Email, OTP, and new password are required' });
             return;
         }
 
-        const { email, otp, newPassword } = req.body;
-
-        const user = await User.findOne({
-            email,
-            otp_code: otp,
-            otp_expires_at: { $gt: Date.now() }
-        });
-
-        if (!user) {
+        const isValid = await verifyUserOtp(email, otp);
+        if (!isValid) {
             res.status(400).json({ message: 'Invalid or expired OTP' });
             return;
         }
 
-        user.password = newPassword;
-        user.otp_code = undefined;
-        user.otp_expires_at = undefined;
-        await user.save();
+        const passwordValidation = validatePassword(newPassword);
+        if (!passwordValidation.isValid) {
+            res.status(400).json({ message: passwordValidation.error });
+            return;
+        }
 
-        res.status(200).json({ message: 'Password updated successfully.' });
+        await resetUserPassword(email, newPassword);
+
+        res.status(200).json({ message: 'Password updated successfully' });
     } catch (error) {
-        next(error);
+        console.error('Reset password error:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
+
+import { OAuth2Client } from 'google-auth-library';
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+export const googleAuth = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { idToken } = req.body;
+        
+        if (!idToken) {
+            res.status(400).json({ message: 'Google ID token is required' });
+            return;
+        }
+
+        const ticket = await client.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        
+        const payload = ticket.getPayload();
+        if (!payload || !payload.email) {
+            res.status(400).json({ message: 'Invalid Google token' });
+            return;
+        }
+
+        const { email, name } = payload;
+        let user = await findUserByEmail(email);
+
+        if (!user) {
+            // Create user if they don't exist
+            // Generate a random password for Google-auth users
+            user = await createUser({
+                name: name || 'Google User',
+                email,
+                password: Math.random().toString(36).slice(-8) + 'A1!',
+            });
+        }
+
+        const token = generateToken(user._id.toString(), user.email);
+
+        res.status(200).json({
+            message: 'Logged in successfully with Google',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+            },
+            token
+        });
+
+    } catch (error) {
+        console.error('Google auth error:', error);
+        res.status(401).json({ message: 'Invalid Google token or server error' });
+    }
+};
+

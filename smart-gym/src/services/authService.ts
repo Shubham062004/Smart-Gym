@@ -19,5 +19,10 @@ export const authService = {
   verifyOtp: async (data: { email: string; otp: string }): Promise<AuthResponse> => {
     const response = await axiosClient.post('/auth/verify-otp', data);
     return response.data;
+  },
+
+  googleAuth: async (idToken: string): Promise<AuthResponse> => {
+    const response = await axiosClient.post('/auth/google', { idToken });
+    return response.data;
   }
 };

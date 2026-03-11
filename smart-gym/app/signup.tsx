@@ -21,6 +21,11 @@ import { useForm as useHookForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '../src/hooks/useAuth';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import * as AuthSession from 'expo-auth-session';
+
+WebBrowser.maybeCompleteAuthSession();
 
 const { width, height } = Dimensions.get('window');
 
@@ -45,11 +50,46 @@ const signupSchema = z.object({
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
+const GoogleIcon: React.FC = () => (
+    <View style={iconStyles.container}>
+        <Text style={iconStyles.text}>G</Text>
+    </View>
+);
+
+const iconStyles = StyleSheet.create({
+    container: { width: 24, height: 24, backgroundColor: '#fff', borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+    text: { fontWeight: 'bold', color: '#EA4335', fontSize: 16 }
+});
+
 export default function SignUpScreen() {
     const router = useRouter();
-    const { register, isRegistering } = useAuth();
+    const { register, isRegistering, googleLogin, isGoogleLoggingIn } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
+
+    const redirectUri = AuthSession.makeRedirectUri();
+
+    const [request, response, promptAsync] = Google.useAuthRequest({
+        webClientId: "688334401903-ec00cbeekct22ltjgvn7bnv6tjvs9p35.apps.googleusercontent.com",
+        iosClientId: "688334401903-ec00cbeekct22ltjgvn7bnv6tjvs9p35.apps.googleusercontent.com",
+        androidClientId: "688334401903-ec00cbeekct22ltjgvn7bnv6tjvs9p35.apps.googleusercontent.com",
+        redirectUri
+    });
+
+    useEffect(() => {
+        console.log("GOOGLE_REDIRECT_URI_TO_WHITELIST:", redirectUri);
+    }, [redirectUri]);
+
+    useEffect(() => {
+        if (response?.type === 'success') {
+            const { id_token } = response.params;
+            if (id_token) {
+                googleLogin(id_token).catch((err: any) => {
+                    Alert.alert("Google Login Failed", err?.response?.data?.message || "Something went wrong");
+                });
+            }
+        }
+    }, [response]);
 
     const {
         control,
@@ -83,9 +123,9 @@ export default function SignUpScreen() {
             goal: data.goal,
         };
 
-        if (data.age) payload.age = parseInt(data.age, 10);
-        if (data.height) payload.height = parseFloat(data.height);
-        if (data.weight) payload.weight = parseFloat(data.weight);
+        if (data.age && data.age.trim() !== '') payload.age = parseInt(data.age, 10);
+        if (data.height && data.height.trim() !== '') payload.height = parseFloat(data.height);
+        if (data.weight && data.weight.trim() !== '') payload.weight = parseFloat(data.weight);
 
         try {
             await register(payload);
@@ -325,6 +365,21 @@ export default function SignUpScreen() {
                             {!isRegistering && <MaterialIcons name="arrow-forward" size={20} color="#ffffff" />}
                         </TouchableOpacity>
 
+                        <View style={styles.dividerContainer}>
+                            <View style={styles.dividerLine} />
+                            <Text style={styles.dividerText}>or continue with</Text>
+                            <View style={styles.dividerLine} />
+                        </View>
+
+                        <TouchableOpacity 
+                            style={styles.googleButton} 
+                            onPress={() => promptAsync()} 
+                            disabled={!request || isGoogleLoggingIn}
+                        >
+                            <GoogleIcon />
+                            <Text style={styles.googleButtonText}>{isGoogleLoggingIn ? "Loading..." : "Continue with Google"}</Text>
+                        </TouchableOpacity>
+
                         <View style={styles.loginRedirectContainer}>
                             <Text style={styles.loginRedirectText}>Already have an account? </Text>
                             <TouchableOpacity onPress={() => router.push('/login')}>
@@ -372,6 +427,11 @@ const styles = StyleSheet.create({
     termsLink: { color: '#2463eb', fontWeight: '600' },
     submitButton: { width: '100%', height: 56, backgroundColor: '#2463eb', borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8, shadowColor: '#2463eb', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 6 },
     submitButtonText: { color: '#ffffff', fontSize: 16, fontWeight: 'bold', marginRight: 8 },
+    dividerContainer: { flexDirection: 'row', alignItems: 'center', paddingVertical: 24, width: '100%' },
+    dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(59, 67, 84, 0.5)' },
+    dividerText: { color: '#64748b', fontSize: 13, paddingHorizontal: 16, backgroundColor: 'transparent' },
+    googleButton: { width: '100%', height: 56, backgroundColor: 'rgba(17, 22, 33, 0.6)', borderWidth: 1, borderColor: '#334155', borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+    googleButtonText: { color: '#ffffff', fontSize: 15, fontWeight: '500', marginLeft: 12 },
     loginRedirectContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 24 },
     loginRedirectText: { color: '#94a3b8', fontSize: 14 },
     loginRedirectLink: { color: '#2463eb', fontSize: 14, fontWeight: 'bold' },

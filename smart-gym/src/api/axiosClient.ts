@@ -1,9 +1,16 @@
 import axios from 'axios';
 import { storage } from '../utils/storage';
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
-// Use local machine IP for physical devices, localhost for simulators
-const BASE_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : 'http://localhost:5000/api';
+const debuggerHost = Constants.expoConfig?.hostUri;
+let localIp = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+if (debuggerHost) {
+  localIp = debuggerHost.split(':')[0];
+}
+
+const BASE_URL = `http://${localIp}:5000/api`;
+
 
 const axiosClient = axios.create({
   baseURL: BASE_URL,

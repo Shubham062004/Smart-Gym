@@ -5,8 +5,8 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import connectDB from './config/db';
 import authRoutes from './routes/authRoutes';
+import connectDB from './config/db';
 
 const app: Express = express();
 
@@ -31,7 +31,7 @@ app.use('/api/auth', authRoutes);
 
 // Root route
 app.get('/', (req: Request, res: Response) => {
-    res.status(200).json({ success: true, message: 'Smart Gym API is running' });
+    res.status(200).json({ success: true, message: 'OnlyFitness API is running' });
 });
 
 // Error Handling Middleware
