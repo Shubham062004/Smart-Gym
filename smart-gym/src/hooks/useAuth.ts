@@ -44,13 +44,13 @@ export const useAuth = () => {
   };
 
   return {
-    login: loginMutation.mutate,
+    login: loginMutation.mutateAsync,
     isLoggingIn: loginMutation.isPending,
     loginError: loginMutation.error,
-    register: registerMutation.mutate,
+    register: registerMutation.mutateAsync,
     isRegistering: registerMutation.isPending,
     registerError: registerMutation.error,
-    verifyOtp: verifyOtpMutation.mutate,
+    verifyOtp: verifyOtpMutation.mutateAsync,
     isVerifying: verifyOtpMutation.isPending,
     logout,
   };

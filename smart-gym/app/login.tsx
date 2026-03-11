@@ -69,7 +69,6 @@ export default function LoginScreen() {
     const onSubmit = async (data: LoginFormValues) => {
         try {
             await login(data);
-            router.replace('/(tabs)');
         } catch (error: any) {
             Alert.alert("Login Failed", error?.response?.data?.message || "Invalid credentials");
         }

@@ -76,11 +76,19 @@ export default function SignUpScreen() {
             return;
         }
 
+        const payload: any = {
+            name: data.name,
+            email: data.email,
+            password: data.password,
+            goal: data.goal,
+        };
+
+        if (data.age) payload.age = parseInt(data.age, 10);
+        if (data.height) payload.height = parseFloat(data.height);
+        if (data.weight) payload.weight = parseFloat(data.weight);
+
         try {
-            await register(data);
-            Alert.alert("Success", "Account created successfully!", [
-                { text: "OK", onPress: () => router.replace('/(tabs)') }
-            ]);
+            await register(payload);
         } catch (error: any) {
             Alert.alert("Signup Failed", error?.response?.data?.message || "Something went wrong");
         }

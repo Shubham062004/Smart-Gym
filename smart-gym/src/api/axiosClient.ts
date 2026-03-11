@@ -3,7 +3,7 @@ import { storage } from '../utils/storage';
 import { Platform } from 'react-native';
 
 // Use local machine IP for physical devices, localhost for simulators
-const BASE_URL = Platform.OS === 'android' ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api';
+const BASE_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : 'http://localhost:5000/api';
 
 const axiosClient = axios.create({
   baseURL: BASE_URL,
