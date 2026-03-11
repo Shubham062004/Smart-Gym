@@ -1,12 +1,12 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../utils/storage';
 import { Platform } from 'react-native';
 
 // Use local machine IP for physical devices, localhost for simulators
-const baseURL = Platform.OS === 'android' ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api';
+const BASE_URL = Platform.OS === 'android' ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api';
 
 const axiosClient = axios.create({
-  baseURL,
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,7 +15,7 @@ const axiosClient = axios.create({
 // Request interceptor to add JWT token
 axiosClient.interceptors.request.use(
   async (config) => {
-    const token = await SecureStore.getItemAsync('userToken');
+    const token = await storage.getItem('userToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,13 +26,13 @@ axiosClient.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle errors (like 401)
+// Response interceptor to handle errors
 axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response && error.response.status === 401) {
       // Handle unauthorized access (e.g., redirect to login or clear store)
-      await SecureStore.deleteItemAsync('userToken');
+      await storage.removeItem('userToken');
     }
     return Promise.reject(error);
   }

@@ -7,7 +7,7 @@ import React, { useEffect } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../src/utils/storage';
 import { useAuthStore } from '../src/store/authStore';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -44,7 +44,7 @@ export default function RootLayout() {
   
   useEffect(() => {
     async function checkAuth() {
-      const token = await SecureStore.getItemAsync('userToken');
+      const token = await storage.getItem('userToken');
       // In a real app, you'd fetch the user profile here with the token
       if (token) {
         // Mocking user data for now since we don't have the backend call results yet
