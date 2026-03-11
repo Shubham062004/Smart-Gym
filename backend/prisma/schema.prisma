@@ -1,0 +1,28 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // URL comes from prisma.config.ts / .env via Prisma v6
+}
+
+model User {
+  id             String   @id @default(uuid())
+  name           String?
+  email          String   @unique
+  password_hash  String
+  age            Int?
+  height         Float?
+  weight         Float?
+  fitness_goal   String?
+  created_at     DateTime @default(now())
+
+  // Fields for password reset flow that the user wanted previously, 
+  // I will add them to support the requested reset flow. 
+  resetPasswordToken  String?
+  resetPasswordExpire DateTime?
+}

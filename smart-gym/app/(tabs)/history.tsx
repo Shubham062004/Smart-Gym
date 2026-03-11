@@ -1,8 +1,11 @@
 import React from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, SafeAreaView, StyleSheet, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useWorkout } from '../../src/hooks/useWorkout';
 
 export default function History() {
+  const { history, isLoadingHistory } = useWorkout();
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
       {/* Header */}
@@ -97,41 +100,52 @@ export default function History() {
         <View className="flex-col gap-4">
           <Text className="text-lg font-bold text-slate-900 dark:text-white mb-2">Recent Sessions</Text>
           
-          {/* Card 1 */}
-          <TouchableOpacity className="rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 mb-4 p-5">
-            <View className="flex-row justify-between items-start mb-4">
-              <View className="flex-row gap-4 items-center">
-                <View className="h-12 w-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <MaterialIcons name="fitness-center" size={24} color="#2563eb" />
+          {isLoadingHistory ? (
+            <ActivityIndicator />
+          ) : (history && history.length > 0) ? (
+            history.map((workout: any, idx: number) => (
+              <TouchableOpacity key={idx} className="rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 mb-4 p-5">
+                <View className="flex-row justify-between items-start mb-4">
+                  <View className="flex-row gap-4 items-center">
+                    <View className="h-12 w-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                      <MaterialIcons name="fitness-center" size={24} color="#2563eb" />
+                    </View>
+                    <View>
+                      <Text className="text-base font-bold text-slate-900 dark:text-white">{workout.name || 'Workout'}</Text>
+                      <Text className="text-xs text-slate-500">
+                        {workout.date ? new Date(workout.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'Unknown Date'}
+                      </Text>
+                    </View>
+                  </View>
+                  {workout.completed && (
+                    <View className="bg-green-100 dark:bg-green-500/10 px-3 py-1 rounded-lg">
+                      <Text className="text-green-500 text-xs font-bold">Completed</Text>
+                    </View>
+                  )}
                 </View>
-                <View>
-                  <Text className="text-base font-bold text-slate-900 dark:text-white">Upper Body Power</Text>
-                  <Text className="text-xs text-slate-500">Oct 24 • 09:30 AM</Text>
+                <View className="flex-row justify-between py-3 border-t border-slate-100 dark:border-slate-700/50 mb-4">
+                  <View className="flex-col items-center flex-1">
+                    <Text className="text-[10px] text-slate-400 uppercase font-medium">Duration</Text>
+                    <Text className="text-sm font-semibold text-slate-900 dark:text-white">{workout.duration || '45 min'}</Text>
+                  </View>
+                  <View className="flex-col items-center flex-1 border-l border-slate-100 dark:border-slate-700/50">
+                    <Text className="text-[10px] text-slate-400 uppercase font-medium">Calories</Text>
+                    <Text className="text-sm font-semibold text-slate-900 dark:text-white">{workout.calories || '320'} kcal</Text>
+                  </View>
+                  <View className="flex-col items-center flex-1 border-l border-slate-100 dark:border-slate-700/50">
+                    <Text className="text-[10px] text-slate-400 uppercase font-medium">Exercises</Text>
+                    <Text className="text-sm font-semibold text-slate-900 dark:text-white">{workout.exercises?.length || 0}</Text>
+                  </View>
                 </View>
-              </View>
-              <View className="bg-green-100 dark:bg-green-500/10 px-3 py-1 rounded-lg">
-                <Text className="text-green-500 text-xs font-bold">Completed</Text>
-              </View>
-            </View>
-            <View className="flex-row justify-between py-3 border-t border-slate-100 dark:border-slate-700/50 mb-4">
-              <View className="flex-col items-center flex-1">
-                <Text className="text-[10px] text-slate-400 uppercase font-medium">Duration</Text>
-                <Text className="text-sm font-semibold text-slate-900 dark:text-white">45 min</Text>
-              </View>
-              <View className="flex-col items-center flex-1 border-l border-slate-100 dark:border-slate-700/50">
-                <Text className="text-[10px] text-slate-400 uppercase font-medium">Calories</Text>
-                <Text className="text-sm font-semibold text-slate-900 dark:text-white">320 kcal</Text>
-              </View>
-              <View className="flex-col items-center flex-1 border-l border-slate-100 dark:border-slate-700/50">
-                <Text className="text-[10px] text-slate-400 uppercase font-medium">Reps</Text>
-                <Text className="text-sm font-semibold text-slate-900 dark:text-white">142</Text>
-              </View>
-            </View>
-            <View className="w-full h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex-row items-center justify-center gap-2">
-              <Text className="text-slate-900 dark:text-white text-sm font-medium">View Details</Text>
-              <MaterialIcons name="arrow-forward" size={16} color="#0f172a" className="dark:color-white" />
-            </View>
-          </TouchableOpacity>
+                <View className="w-full h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex-row items-center justify-center gap-2">
+                  <Text className="text-slate-900 dark:text-white text-sm font-medium">View Details</Text>
+                  <MaterialIcons name="arrow-forward" size={16} color="#0f172a" className="dark:color-white" />
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text className="text-slate-500 dark:text-slate-400 text-center py-4">No recent workouts found.</Text>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

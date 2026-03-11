@@ -11,7 +11,8 @@ import {
     Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, Feather } from '@expo/vector-icons';
+import axiosClient from '../src/api/axiosClient';
 
 export default function ForgotPasswordScreen() {
     const router = useRouter();
@@ -26,28 +27,16 @@ export default function ForgotPasswordScreen() {
 
         setIsLoading(true);
         try {
-            const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000';
-
-            const response = await fetch(`${API_URL}/auth/forgot-password`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
-            });
-            const data = await response.json();
-
-            if (response.ok) {
-                Alert.alert("Success", data.message, [
-                    {
-                        text: "OK",
-                        onPress: () => router.push({ pathname: '/reset-password', params: { email } })
-                    }
-                ]);
-            } else {
-                Alert.alert("Error", data.message || "Something went wrong.");
-            }
-        } catch (error) {
+            const response = await axiosClient.post('/auth/forgot-password', { email });
+            Alert.alert("Success", response.data.message, [
+                {
+                    text: "OK",
+                    onPress: () => router.push({ pathname: '/verify-otp', params: { email } })
+                }
+            ]);
+        } catch (error: any) {
             console.error(error);
-            Alert.alert("Network Error", "Could not connect to the server.");
+            Alert.alert("Error", error.response?.data?.message || "Could not connect to the server.");
         } finally {
             setIsLoading(false);
         }
@@ -59,35 +48,44 @@ export default function ForgotPasswordScreen() {
                 <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                     <MaterialIcons name="arrow-back" size={24} color="#f1f5f9" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Forgot Password</Text>
-                <View style={{ width: 48 }} />
             </View>
 
             <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
                 <View style={styles.container}>
+                    <View style={styles.iconContainer}>
+                        <MaterialIcons name="screen-lock-portrait" size={32} color="#3b82f6" style={styles.heroIcon} />
+                    </View>
+                    <Text style={styles.title}>Forgot Password?</Text>
                     <Text style={styles.description}>
-                        Enter the email address associated with your account and we'll send you a 6-digit OTP to reset your password.
+                        No worries! Enter your email address below and we'll send you an OTP for verification.
                     </Text>
 
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Email Address</Text>
-                        <View style={styles.inputWrapper}>
-                            <MaterialIcons name="mail" size={20} color="#64748b" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="you@example.com"
-                                placeholderTextColor="#64748b"
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                value={email}
-                                onChangeText={setEmail}
-                            />
+                    <View style={styles.card}>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Email address</Text>
+                            <View style={styles.inputWrapper}>
+                                <MaterialIcons name="mail-outline" size={20} color="#64748b" style={styles.inputIcon} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="example@fitcoach.ai"
+                                    placeholderTextColor="#64748b"
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                />
+                            </View>
                         </View>
+
+                        <TouchableOpacity style={styles.submitButton} onPress={handleSendOTP} disabled={isLoading}>
+                            <Text style={styles.submitButtonText}>{isLoading ? "Sending..." : "Send OTP"}</Text>
+                            {!isLoading && <MaterialIcons name="send" size={16} color="#ffffff" />}
+                        </TouchableOpacity>
                     </View>
 
-                    <TouchableOpacity style={styles.submitButton} onPress={handleSendOTP} disabled={isLoading}>
-                        <Text style={styles.submitButtonText}>{isLoading ? "Sending..." : "Send OTP"}</Text>
-                        {!isLoading && <MaterialIcons name="send" size={20} color="#ffffff" />}
+                    <TouchableOpacity style={styles.loginContainer} onPress={() => router.push('/login')}>
+                        <Feather name="log-in" size={16} color="#94a3b8" />
+                        <Text style={styles.loginText}>Back to Login</Text>
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>
@@ -96,24 +94,38 @@ export default function ForgotPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-    safe: { flex: 1, backgroundColor: '#111621' },
+    safe: { flex: 1, backgroundColor: '#0f172a' },
     flex: { flex: 1 },
     headerRow: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 16,
-        paddingVertical: 12,
-        justifyContent: 'space-between',
+        paddingTop: 16,
+        paddingBottom: 0,
+        justifyContent: 'flex-start',
     },
-    backButton: { width: 48, height: 48, justifyContent: 'center', alignItems: 'center' },
-    headerTitle: { color: '#f1f5f9', fontSize: 18, fontWeight: '700', flex: 1, textAlign: 'center', marginLeft: -12 },
-    container: { padding: 24, flex: 1, justifyContent: 'center', paddingBottom: 100 },
-    description: { color: '#94a3b8', fontSize: 15, lineHeight: 22, textAlign: 'center', marginBottom: 32 },
+    backButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.05)', justifyContent: 'center', alignItems: 'center' },
+    container: { padding: 24, flex: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 100 },
+    iconContainer: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        backgroundColor: 'rgba(59,130,246,0.1)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    heroIcon: { opacity: 0.9 },
+    title: { color: '#ffffff', fontSize: 24, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' },
+    description: { color: '#94a3b8', fontSize: 16, lineHeight: 24, textAlign: 'center', marginBottom: 40, paddingHorizontal: 10 },
+    card: { width: '100%', backgroundColor: 'rgba(30,41,59,0.5)', borderRadius: 24, padding: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' },
     inputGroup: { marginBottom: 24 },
-    label: { color: '#cbd5e1', fontSize: 14, fontWeight: '500', marginBottom: 8, marginLeft: 4 },
-    inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1c1f27', borderWidth: 1, borderColor: '#3b4354', borderRadius: 12, height: 52 },
+    label: { color: '#f8fafc', fontSize: 14, fontWeight: '600', marginBottom: 12 },
+    inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1e293b', borderRadius: 16, height: 56 },
     inputIcon: { paddingLeft: 16, paddingRight: 10 },
     input: { flex: 1, color: '#ffffff', fontSize: 15, height: '100%', paddingRight: 16 },
-    submitButton: { width: '100%', height: 52, backgroundColor: '#2463eb', borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', shadowColor: '#2463eb', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 5 },
+    submitButton: { width: '100%', height: 56, backgroundColor: '#3b82f6', borderRadius: 28, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
     submitButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '600', marginRight: 8 },
+    loginContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 40 },
+    loginText: { color: '#94a3b8', fontSize: 15, fontWeight: '600', marginLeft: 8 },
 });
