@@ -35,19 +35,27 @@ export const completeWorkout = async (
 ) => {
     const { duration, reps, calories } = sessionData;
 
-    // Create session (we handle strings by converting them to ObjectIds if valid, or ignore if they are mock IDs)
+    // Fetch workout name for exerciseName
+    let exerciseName = "Unknown Workout";
     try {
         if (mongoose.Types.ObjectId.isValid(workoutId)) {
-             await WorkoutSession.create({
-                userId,
-                workoutId,
-                duration,
-                caloriesBurned: calories,
-                reps,
-            });
+            const workout = await Workout.findById(workoutId);
+            if (workout) exerciseName = workout.name;
         }
+    } catch (e) {}
+
+    // Create session
+    try {
+        await WorkoutSession.create({
+            userId,
+            exerciseName,
+            totalReps: reps || 0,
+            duration,
+            caloriesBurned: calories,
+            formAccuracy: 100, // Default for manual completion
+        });
     } catch(err) {
-        console.error("Error creating session, might be a mock workout id:", err);
+        console.error("Error creating session:", err);
     }
 
     // Update Dashboard Statistics
@@ -59,17 +67,52 @@ export const completeWorkout = async (
             totalReps: reps || 0,
             workoutDuration: duration || 0,
             caloriesBurned: calories || 0,
-            weeklyProgress: 0.1, // bump by 10%
+            weeklyProgress: 0.1, 
         });
     } else {
         stats.totalReps += (reps || 0);
         stats.workoutDuration += (duration || 0);
         stats.caloriesBurned += (calories || 0);
-        
-        // Simple mock algorithm to update progress
         stats.weeklyProgress = Math.min(stats.weeklyProgress + 0.1, 1.0);
         await stats.save();
     }
 
     return { message: "Workout completed", stats };
+};
+
+export const saveMLSession = async (
+    userId: string,
+    sessionData: { exerciseName: string; totalReps: number; duration: number; caloriesBurned: number; formAccuracy: number }
+) => {
+    const { exerciseName, totalReps, duration, caloriesBurned, formAccuracy } = sessionData;
+
+    const session = await WorkoutSession.create({
+        userId,
+        exerciseName,
+        totalReps,
+        duration,
+        caloriesBurned,
+        formAccuracy,
+    });
+
+    // Update Dashboard Statistics
+    let stats = await UserStats.findOne({ userId });
+    
+    if (!stats) {
+        stats = await UserStats.create({
+            userId,
+            totalReps,
+            workoutDuration: duration,
+            caloriesBurned,
+            weeklyProgress: 0.05,
+        });
+    } else {
+        stats.totalReps += totalReps;
+        stats.workoutDuration += Math.round(duration / 60); // assuming duration is in seconds for ML, but minutes for stats
+        stats.caloriesBurned += caloriesBurned;
+        stats.weeklyProgress = Math.min(stats.weeklyProgress + 0.05, 1.0);
+        await stats.save();
+    }
+
+    return session;
 };

@@ -2,19 +2,21 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 
 export interface IWorkoutSession extends Document {
   userId: mongoose.Types.ObjectId;
-  workoutId: mongoose.Types.ObjectId;
-  duration: number; // in minutes
+  exerciseName: string;
+  totalReps: number;
+  duration: number; // in seconds or minutes (prompt says duration, usually sessions are minutes but camera screen shows seconds) -> let's use number
   caloriesBurned: number;
-  reps?: number;
+  formAccuracy: number;
   completedAt: Date;
 }
 
 const WorkoutSessionSchema = new Schema<IWorkoutSession>({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  workoutId: { type: Schema.Types.ObjectId, ref: 'Workout', required: true },
+  exerciseName: { type: String, required: true },
+  totalReps: { type: Number, required: true },
   duration: { type: Number, required: true },
   caloriesBurned: { type: Number, required: true },
-  reps: { type: Number, default: null },
+  formAccuracy: { type: Number, required: true },
   completedAt: { type: Date, default: Date.now },
 });
 
