@@ -6,6 +6,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/authRoutes';
+import dashboardRoutes from './routes/dashboardRoutes';
+import workoutRoutes from './routes/workoutRoutes';
 import connectDB from './config/db';
 
 const app: Express = express();
@@ -28,6 +30,8 @@ app.use('/api/auth', limiter);
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/workouts', workoutRoutes);
 
 // Root route
 app.get('/', (req: Request, res: Response) => {
