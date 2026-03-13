@@ -40,30 +40,21 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const loaded = true; // Temporary bypass for missing fonts
 
-  const { isAuthenticated, setAuth } = useAuthStore();
+  const { isAuthenticated, isLoading, loadStoredAuth } = useAuthStore();
   
   useEffect(() => {
-    async function checkAuth() {
-      const token = await storage.getItem('userToken');
-      // In a real app, you'd fetch the user profile here with the token
-      if (token) {
-        // Mocking user data for now since we don't have the backend call results yet
-        // In a real implementation, you'd call userService.getProfile()
-        setAuth({ id: '1', email: 'user@example.com' } as any, token);
-      }
-    }
-    checkAuth();
+    loadStoredAuth();
   }, []);
 
   useProtectedRoute(isAuthenticated);
 
   useEffect(() => {
-    if (loaded) {
+    if (loaded && !isLoading) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, isLoading]);
 
-  if (!loaded) {
+  if (!loaded || isLoading) {
     return null;
   }
 

@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userService } from '../services/userService';
 import { useUserStore } from '../store/userStore';
+import { useAuthStore } from '../store/authStore';
 
 export const useProfile = () => {
   const queryClient = useQueryClient();
   const setProfile = useUserStore((state) => state.setProfile);
+  const setUserAuth = useAuthStore((state) => state.setUser);
   const updateStorePreferences = useUserStore((state) => state.updatePreferences);
 
   const profileQuery = useQuery({
@@ -12,6 +14,7 @@ export const useProfile = () => {
     queryFn: async () => {
       const profile = await userService.getProfile();
       setProfile(profile);
+      setUserAuth(profile);
       return profile;
     },
   });
@@ -20,6 +23,7 @@ export const useProfile = () => {
     mutationFn: userService.updateProfile,
     onSuccess: (updatedProfile) => {
       setProfile(updatedProfile);
+      setUserAuth(updatedProfile);
       queryClient.setQueryData(['profile'], updatedProfile);
     },
   });

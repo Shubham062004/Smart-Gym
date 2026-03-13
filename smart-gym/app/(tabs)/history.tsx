@@ -4,7 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useWorkout } from '../../src/hooks/useWorkout';
 
 export default function History() {
-  const { history, isLoadingHistory } = useWorkout();
+  const { workoutHistory, isLoadingHistory } = useWorkout();
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
@@ -102,8 +102,8 @@ export default function History() {
           
           {isLoadingHistory ? (
             <ActivityIndicator />
-          ) : (history && history.length > 0) ? (
-            history.map((workout: any, idx: number) => (
+          ) : (workoutHistory && workoutHistory.length > 0) ? (
+            workoutHistory.map((workout: any, idx: number) => (
               <TouchableOpacity key={idx} className="rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 mb-4 p-5">
                 <View className="flex-row justify-between items-start mb-4">
                   <View className="flex-row gap-4 items-center">
@@ -111,30 +111,28 @@ export default function History() {
                       <MaterialIcons name="fitness-center" size={24} color="#2563eb" />
                     </View>
                     <View>
-                      <Text className="text-base font-bold text-slate-900 dark:text-white">{workout.name || 'Workout'}</Text>
+                      <Text className="text-base font-bold text-slate-900 dark:text-white">{workout.exerciseName || 'Workout'}</Text>
                       <Text className="text-xs text-slate-500">
-                        {workout.date ? new Date(workout.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'Unknown Date'}
+                        {workout.completedAt ? new Date(workout.completedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'Unknown Date'}
                       </Text>
                     </View>
                   </View>
-                  {workout.completed && (
-                    <View className="bg-green-100 dark:bg-green-500/10 px-3 py-1 rounded-lg">
-                      <Text className="text-green-500 text-xs font-bold">Completed</Text>
-                    </View>
-                  )}
+                  <View className="bg-green-100 dark:bg-green-500/10 px-3 py-1 rounded-lg">
+                    <Text className="text-green-500 text-xs font-bold">{workout.formAccuracy}% Accuracy</Text>
+                  </View>
                 </View>
                 <View className="flex-row justify-between py-3 border-t border-slate-100 dark:border-slate-700/50 mb-4">
                   <View className="flex-col items-center flex-1">
                     <Text className="text-[10px] text-slate-400 uppercase font-medium">Duration</Text>
-                    <Text className="text-sm font-semibold text-slate-900 dark:text-white">{workout.duration || '45 min'}</Text>
+                    <Text className="text-sm font-semibold text-slate-900 dark:text-white">{Math.round(workout.duration)}s</Text>
                   </View>
                   <View className="flex-col items-center flex-1 border-l border-slate-100 dark:border-slate-700/50">
                     <Text className="text-[10px] text-slate-400 uppercase font-medium">Calories</Text>
-                    <Text className="text-sm font-semibold text-slate-900 dark:text-white">{workout.calories || '320'} kcal</Text>
+                    <Text className="text-sm font-semibold text-slate-900 dark:text-white">{workout.caloriesBurned} kcal</Text>
                   </View>
                   <View className="flex-col items-center flex-1 border-l border-slate-100 dark:border-slate-700/50">
-                    <Text className="text-[10px] text-slate-400 uppercase font-medium">Exercises</Text>
-                    <Text className="text-sm font-semibold text-slate-900 dark:text-white">{workout.exercises?.length || 0}</Text>
+                    <Text className="text-[10px] text-slate-400 uppercase font-medium">Total Reps</Text>
+                    <Text className="text-sm font-semibold text-slate-900 dark:text-white">{workout.totalReps || 0}</Text>
                   </View>
                 </View>
                 <View className="w-full h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex-row items-center justify-center gap-2">

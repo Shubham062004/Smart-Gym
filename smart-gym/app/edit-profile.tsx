@@ -135,7 +135,7 @@ export default function EditProfile() {
                   placeholderTextColor="#94a3b8"
                   keyboardType="numeric"
                   onBlur={onBlur}
-                  onChangeText={onChange}
+                  onChangeText={(text) => onChange(Number(text))}
                   value={value?.toString()}
                 />
               )}

@@ -8,7 +8,7 @@ export const userService = {
   },
 
   updateProfile: async (userData: Partial<User>): Promise<User> => {
-    const response = await axiosClient.patch('/user/profile', userData);
+    const response = await axiosClient.put('/user/profile', userData);
     return response.data;
   },
 

@@ -13,17 +13,17 @@ export const workoutService = {
   },
 
   startWorkout: async (workoutId: string) => {
-    const response = await axiosClient.post('/workouts/start', { workoutId });
+    const response = await axiosClient.post('/workout-session/start', { workoutId });
     return response.data;
   },
 
   completeWorkout: async (workoutData: any) => {
-    const response = await axiosClient.post('/workouts/complete', workoutData);
+    const response = await axiosClient.post('/workout-session/finish', workoutData);
     return response.data;
   },
 
   getWorkoutHistory: async (): Promise<any[]> => {
-    const response = await axiosClient.get('/workouts/history');
+    const response = await axiosClient.get('/workout-history');
     return response.data;
   },
 
