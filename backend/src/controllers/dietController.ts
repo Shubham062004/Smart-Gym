@@ -6,18 +6,26 @@ export const getDietPlan = async (req: any, res: Response) => {
         const diet = await DietPlan.findOne({ userId: req.user.id }).sort({ createdAt: -1 });
         if (!diet) {
             return res.status(200).json({
-                dailyCalories: 1850,
-                protein: 160,
-                carbs: 210,
-                fats: 55,
+                calories: 2200,
+                protein: 150,
+                carbs: 250,
+                fats: 70,
                 meals: [
-                    { name: 'Overnight Berry Oats', description: 'Oats, Blueberries, Almond Milk', calories: 420, protein: 12 },
-                    { name: 'Grilled Chicken Quinoa Bowl', description: 'Chicken Breast, Quinoa, Avocado', calories: 580, protein: 45 }
-                ],
-                supplements: ['Multivitanim', 'Whey Isolate']
+                    { name: 'Oatmeal with Blueberries', description: 'High fiber breakfast', calories: 350, protein: 10 },
+                    { name: 'Grilled Chicken Salad', description: 'Protein rich lunch', calories: 450, protein: 40 },
+                    { name: 'Salmon and Quinoa', description: 'Healthy fats dinner', calories: 600, protein: 35 }
+                ]
             });
         }
-        res.status(200).json(diet);
+        
+        // Map to requested format
+        res.status(200).json({
+            calories: diet.dailyCalories,
+            protein: diet.protein,
+            carbs: diet.carbs,
+            fats: diet.fats,
+            meals: diet.meals || []
+        });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }

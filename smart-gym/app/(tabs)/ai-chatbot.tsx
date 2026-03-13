@@ -34,13 +34,35 @@ export default function AIChatbotScreen() {
 
         try {
             const data = await aiService.chat(userMsg);
+            
+            // Handle new combined response format
             const aiMessage: Message = { 
                 id: (Date.now() + 1).toString(),
                 role: 'ai', 
-                content: data.response, 
-                isStructured: data.isStructured 
+                content: data.message,
+                isStructured: data.workoutPlan?.length > 0 || data.dietPlan?.length > 0
             };
+
             setMessages(prev => [...prev, aiMessage]);
+
+            if (data.workoutPlan?.length > 0) {
+                setMessages(prev => [...prev, {
+                    id: (Date.now() + 2).toString(),
+                    role: 'ai',
+                    content: { type: 'workout_plan', plan: data.workoutPlan },
+                    isStructured: true
+                }]);
+            }
+            
+            if (data.dietPlan?.length > 0) {
+                 setMessages(prev => [...prev, {
+                    id: (Date.now() + 3).toString(),
+                    role: 'ai',
+                    content: { type: 'diet_plan', plan: data.dietPlan },
+                    isStructured: true
+                }]);
+            }
+
         } catch (error) {
             setMessages(prev => [...prev, { id: 'err', role: 'ai', content: "Sorry, I'm having trouble connecting right now." }]);
         } finally {

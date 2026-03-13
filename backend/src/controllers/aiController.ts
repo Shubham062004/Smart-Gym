@@ -10,18 +10,31 @@ export const handleAIChat = async (req: Request, res: Response) => {
 
     const aiResponse = await generateChatResponse(message);
     
-    // Try to parse JSON if it looks like JSON
+    let workoutPlan = [];
+    let dietPlan = [];
+    let finalMessage = aiResponse;
+
+    // Try to extract structured data from AI response if present
     try {
         const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
-            return res.status(200).json({ success: true, response: parsed, isStructured: true });
+            if (parsed.type === 'workout_plan') workoutPlan = parsed.plan || [];
+            if (parsed.type === 'diet_plan') dietPlan = parsed.plan || [];
+            
+            // Remove the JSON block from the readable message
+            finalMessage = aiResponse.replace(jsonMatch[0], '').trim();
         }
     } catch (e) {
-        // Fallback to text
+        // Just send as text if parsing fails
     }
 
-    res.status(200).json({ success: true, response: aiResponse, isStructured: false });
+    res.status(200).json({ 
+        success: true, 
+        message: finalMessage || "Here is your plan:", 
+        workoutPlan, 
+        dietPlan 
+    });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

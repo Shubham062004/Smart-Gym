@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../../src/store/authStore';
 import { useWorkout } from '../../src/hooks/useWorkout';
 import { useDashboard } from '../../src/hooks/useDashboard';
@@ -66,49 +67,47 @@ export default function Homepage() {
           
           <View className="flex-col gap-4">
             {/* Main Stat Card */}
-            <View className="bg-blue-600 rounded-xl p-5 shadow-lg relative overflow-hidden">
+            <View className="bg-primary rounded-xl p-5 shadow-lg relative overflow-hidden shadow-primary/20">
               <View className="absolute top-0 right-0 p-3 opacity-10">
-                <MaterialIcons name="fitness-center" size={100} color="white" />
+                <MaterialIcons name="fitness-center" size={100} color="black" />
               </View>
               <View className="relative z-10">
-                <Text className="text-blue-100 font-medium mb-1">Total Reps</Text>
+                <Text className="text-black/60 font-medium mb-1 uppercase tracking-widest text-[10px]">Total Reps</Text>
                 <View className="flex-row items-end gap-2">
-                  <Text className="text-4xl font-bold tracking-tight text-white">{summary?.totalReps || 0}</Text>
-                  <Text className="text-sm font-medium text-blue-100 mb-1.5">
-                    {summary?.weeklyProgress > 0 ? `+${(summary.weeklyProgress * 100).toFixed(0)}% vs yesterday` : 'Ready to start?'}
+                  <Text className="text-5xl font-black tracking-tighter text-black">{summary?.totalReps || 0}</Text>
+                  <Text className="text-sm font-bold text-black/60 mb-2">
+                    {summary?.totalReps > 0 ? 'KEEP IT UP!' : 'READY?'}
                   </Text>
                 </View>
-                <View className="mt-4 w-full bg-black/20 rounded-full h-1.5 opacity-50">
-                  <View className="bg-white h-1.5 rounded-full" style={{ width: `${Math.min((summary?.totalReps || 0) / 500 * 100, 100)}%` }} />
+                <View className="mt-4 w-full bg-black/10 rounded-full h-2">
+                  <View className="bg-black h-2 rounded-full" style={{ width: `${Math.min((summary?.totalReps || 0) / 100 * 100, 100)}%` }} />
                 </View>
               </View>
             </View>
             
             <View className="flex-row gap-4">
               {/* Secondary Stats */}
-              <View className="flex-1 bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+              <View className="flex-1 bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm">
                 <View className="flex-row justify-between items-start mb-2">
-                  <View className="p-2 bg-green-100 dark:bg-green-500/10 rounded-lg">
-                    <MaterialIcons name="timer" size={24} color="#22c55e" />
+                  <View className="p-2 bg-primary/10 rounded-lg">
+                    <MaterialIcons name="timer" size={20} color="#0df20d" />
                   </View>
-                  <Text className="text-xs font-medium text-slate-400">Target: 60m</Text>
                 </View>
                 <View>
-                  <Text className="text-2xl font-bold text-slate-900 dark:text-white">{summary?.workoutDuration || 0} <Text className="text-sm font-normal text-slate-500">min</Text></Text>
-                  <Text className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">Duration</Text>
+                  <Text className="text-2xl font-bold text-slate-900 dark:text-white">{summary?.durationMinutes || 0} <Text className="text-xs font-normal text-slate-400">min</Text></Text>
+                  <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Duration</Text>
                 </View>
               </View>
               
-              <View className="flex-1 bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+              <View className="flex-1 bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm">
                 <View className="flex-row justify-between items-start mb-2">
-                  <View className="p-2 bg-purple-100 dark:bg-purple-500/10 rounded-lg">
-                    <MaterialIcons name="local-fire-department" size={24} color="#a855f7" />
+                  <View className="p-2 bg-orange-500/10 rounded-lg">
+                    <MaterialIcons name="local-fire-department" size={20} color="#f97316" />
                   </View>
-                  <Text className="text-xs font-medium text-slate-400">Target: 500</Text>
                 </View>
                 <View>
-                  <Text className="text-2xl font-bold text-slate-900 dark:text-white">{summary?.caloriesBurned || 0} <Text className="text-sm font-normal text-slate-500">kcal</Text></Text>
-                  <Text className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">Calories Burned</Text>
+                  <Text className="text-2xl font-bold text-slate-900 dark:text-white">{summary?.caloriesBurned || 0} <Text className="text-xs font-normal text-slate-400">kcal</Text></Text>
+                  <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Burned</Text>
                 </View>
               </View>
             </View>
@@ -120,55 +119,71 @@ export default function Homepage() {
           <View className="flex-row items-center justify-between px-6 mb-4">
             <Text className="text-lg font-bold text-slate-900 dark:text-white">Quick Start</Text>
             <TouchableOpacity onPress={() => router.push('/(tabs)/workouts')}>
-                <Text className="text-sm font-medium text-blue-600 dark:text-blue-400">See All</Text>
+                <Text className="text-sm font-bold text-primary">See All</Text>
             </TouchableOpacity>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 24, gap: 16 }}>
-            {quickWorkouts.map((workout: any) => (
-              <View key={workout.id || workout._id} className="w-40 bg-white dark:bg-slate-800 rounded-xl p-1 border border-slate-200 dark:border-slate-700">
-                <View className="h-24 w-full bg-slate-200 dark:bg-slate-700 rounded-lg overflow-hidden relative">
-                  <Image source={{ uri: workout.image }} className="w-full h-full absolute" />
-                  <View className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <TouchableOpacity className="bg-white/20 p-2 rounded-full" onPress={() => handleStartWorkout(workout.id || workout._id)}>
-                      <MaterialIcons name="play-arrow" size={24} color="white" />
-                    </TouchableOpacity>
-                  </View>
+            {Array.isArray(quickWorkouts) && quickWorkouts.map((workout: any) => (
+              <TouchableOpacity 
+                key={workout.id || workout._id} 
+                className="w-40 bg-white dark:bg-slate-800 rounded-2xl p-2 border border-slate-200 dark:border-slate-700 shadow-sm"
+                onPress={() => handleStartWorkout(workout.id || workout._id)}
+              >
+                <View className="h-28 w-full bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden relative">
+                  <Image source={{ uri: workout.image || 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=500' }} className="w-full h-full absolute" />
+                  <LinearGradient colors={['transparent', 'rgba(0,0,0,0.8)']} className="absolute inset-0 justify-end p-2">
+                     <View className="w-8 h-8 bg-primary rounded-full items-center justify-center">
+                        <MaterialIcons name="play-arrow" size={20} color="black" />
+                     </View>
+                  </LinearGradient>
                 </View>
-                <View className="p-3">
-                  <Text className="font-bold text-slate-900 dark:text-white mb-1">{workout.name}</Text>
+                <View className="p-2">
+                  <Text className="font-bold text-sm text-slate-900 dark:text-white mb-1" numberOfLines={1}>{workout.name}</Text>
                   <View className="flex-row items-center gap-1">
-                    <MaterialIcons name="bolt" size={14} color="#64748b" />
-                    <Text className="text-xs text-slate-500 dark:text-slate-400">{workout.difficulty}</Text>
+                    <Text className="text-[10px] font-bold text-slate-400 uppercase">{workout.difficulty || 'Beginner'}</Text>
+                    <Text className="text-[10px] text-slate-400">•</Text>
+                    <Text className="text-[10px] font-bold text-slate-400 uppercase">{workout.duration || 5} MIN</Text>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
 
         {/* Weekly Progress */}
-        <View className="px-6 mb-6">
-          <Text className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Weekly Progress</Text>
-          <View className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
-            <View className="flex-row items-center justify-between mb-6">
+        <View className="px-6 mb-10">
+          <Text className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Weekly Activity</Text>
+          <View className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+            <View className="flex-row items-center justify-between mb-8">
               <View>
-                <Text className="text-sm text-slate-500 dark:text-slate-400">Average Activity</Text>
-                <Text className="text-xl font-bold text-slate-900 dark:text-white">1.2 hrs<Text className="text-sm font-normal text-slate-500">/day</Text></Text>
+                <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sessions</Text>
+                <Text className="text-2xl font-black text-slate-900 dark:text-white">
+                    {Array.isArray(summary?.weeklyActivity) ? summary.weeklyActivity.reduce((a: number, b: number) => a + b, 0) : 0}
+                </Text>
               </View>
-              <View className="flex-row items-center bg-green-100 dark:bg-green-500/10 px-2 py-1 rounded">
-                <MaterialIcons name="trending-up" size={16} color="#22c55e" />
-                <Text className="text-green-500 text-xs font-bold ml-1">+12%</Text>
+              <View className="bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
+                <Text className="text-primary text-[10px] font-bold uppercase tracking-widest">Active Week</Text>
               </View>
             </View>
-            {/* Very simple chart replacement */}
-            <View className="flex-row items-end justify-between h-32 gap-2">
-              <View className="flex-1 items-center gap-2 h-full"><View className="w-full bg-slate-100 dark:bg-slate-700 rounded-t-sm h-full justify-end overflow-hidden"><View className="w-full bg-slate-300 dark:bg-slate-600 rounded-t-sm" style={{ height: '40%' }} /></View><Text className="text-xs text-slate-500 font-medium">M</Text></View>
-              <View className="flex-1 items-center gap-2 h-full"><View className="w-full bg-slate-100 dark:bg-slate-700 rounded-t-sm h-full justify-end overflow-hidden"><View className="w-full bg-slate-300 dark:bg-slate-600 rounded-t-sm" style={{ height: '65%' }} /></View><Text className="text-xs text-slate-500 font-medium">T</Text></View>
-              <View className="flex-1 items-center gap-2 h-full"><View className="w-full bg-slate-100 dark:bg-slate-700 rounded-t-sm h-full justify-end overflow-hidden"><View className="w-full bg-slate-300 dark:bg-slate-600 rounded-t-sm" style={{ height: '35%' }} /></View><Text className="text-xs text-slate-500 font-medium">W</Text></View>
-              <View className="flex-1 items-center gap-2 h-full"><View className="w-full bg-slate-100 dark:bg-slate-700 rounded-t-sm h-full justify-end overflow-hidden"><View className="w-full bg-blue-600 rounded-t-sm" style={{ height: '85%' }} /></View><Text className="text-xs text-blue-600 font-bold">T</Text></View>
-              <View className="flex-1 items-center gap-2 h-full"><View className="w-full bg-slate-100 dark:bg-slate-700 rounded-t-sm h-full justify-end overflow-hidden"><View className="w-full bg-slate-300 dark:bg-slate-600 rounded-t-sm" style={{ height: '50%' }} /></View><Text className="text-xs text-slate-500 font-medium">F</Text></View>
-              <View className="flex-1 items-center gap-2 h-full"><View className="w-full bg-slate-100 dark:bg-slate-700 rounded-t-sm h-full justify-end overflow-hidden"><View className="w-full bg-slate-300 dark:bg-slate-600 rounded-t-sm" style={{ height: '30%' }} /></View><Text className="text-xs text-slate-500 font-medium">S</Text></View>
-              <View className="flex-1 items-center gap-2 h-full"><View className="w-full bg-slate-100 dark:bg-slate-700 rounded-t-sm h-full justify-end overflow-hidden"><View className="w-full bg-slate-300 dark:bg-slate-600 rounded-t-sm" style={{ height: '20%' }} /></View><Text className="text-xs text-slate-500 font-medium">S</Text></View>
+            
+            <View className="flex-row items-end justify-between h-32 gap-3">
+              {['M','T','W','T','F','S','S'].map((day, idx) => {
+                const val = Array.isArray(summary?.weeklyActivity) ? summary.weeklyActivity[idx] : 0;
+                const maxVal = Math.max(...(Array.isArray(summary?.weeklyActivity) ? summary.weeklyActivity : [1]), 1);
+                const heightPercent = (val / maxVal) * 100;
+                
+                return (
+                    <View key={idx} className="flex-1 items-center gap-3 h-full">
+                        <View className="w-full bg-slate-100 dark:bg-slate-700/50 rounded-full h-full justify-end overflow-hidden">
+                            <View 
+                                className={`w-full rounded-full ${val > 0 ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`} 
+                                style={{ height: `${val > 0 ? heightPercent : 0}%`, minHeight: val > 0 ? 10 : 0 }} 
+                            />
+                        </View>
+                        <Text className={`text-[10px] font-black ${val > 0 ? 'text-primary' : 'text-slate-400'}`}>{day}</Text>
+                    </View>
+                )
+              })}
             </View>
           </View>
         </View>

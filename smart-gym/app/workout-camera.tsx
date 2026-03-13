@@ -58,16 +58,16 @@ export default function WorkoutCameraScreen() {
   }, [isPaused, isWorking]);
 
   const saveSessionMutation = useMutation({
-    mutationFn: (data: any) => axiosClient.post('/workout-session', data),
+    mutationFn: (data: any) => axiosClient.post('/workouts/session', data),
     onSuccess: (response) => {
       router.push({
           pathname: '/workout-summary' as any,
           params: {
               exerciseName: "Squats",
-              totalReps: reps,
-              duration: Math.round(time),
-              caloriesBurned: Math.round(time * 0.15),
-              formAccuracy: formAccuracy
+              totalReps: reps.toString(),
+              duration: Math.round(time).toString(),
+              caloriesBurned: Math.round(time * 0.15).toString(),
+              formAccuracy: formAccuracy.toString()
           }
       });
     },

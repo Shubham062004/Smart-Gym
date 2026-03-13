@@ -8,14 +8,14 @@ const { width } = Dimensions.get('window');
 
 export default function Progress() {
   const router = useRouter();
-  const [weeklyData, setWeeklyData] = useState<any[]>([]);
+  const [progressData, setProgressData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProgress = async () => {
       try {
         const response = await axiosClient.get('/progress/weekly');
-        setWeeklyData(response.data.data);
+        setProgressData(response.data.data);
       } catch (error) {
         console.error(error);
       } finally {
@@ -26,77 +26,99 @@ export default function Progress() {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
-      <View className="flex-row items-center justify-between p-4 pt-6 pb-2 bg-gray-50/95 dark:bg-slate-900/95">
+    <SafeAreaView className="flex-1 bg-black">
+      <View className="flex-row items-center justify-between p-6 bg-black border-b border-white/5">
         <TouchableOpacity 
-          className="w-10 h-10 flex items-center justify-center rounded-full"
+          className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10"
           onPress={() => router.back()}
         >
-          <MaterialIcons name="arrow-back" size={24} color="#0f172a" className="dark:color-white" />
+          <MaterialIcons name="arrow-back" size={20} color="white" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-slate-900 dark:text-white flex-1 text-center">Your Progress</Text>
+        <Text className="text-xl font-bold text-white tracking-tight">Performance Analytics</Text>
         <View className="w-10" />
       </View>
 
-      <ScrollView className="flex-1 px-4 py-2" contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView className="flex-1 px-6 pt-6" contentContainerStyle={{ paddingBottom: 120 }}>
         {isLoading ? (
-          <ActivityIndicator size="large" color="#0df20d" className="mt-20" />
+          <View className="mt-20">
+            <ActivityIndicator size="large" color="#0df20d" />
+            <Text className="text-white/40 text-center mt-4 uppercase tracking-widest text-[10px] font-bold">Fetching Analytics...</Text>
+          </View>
         ) : (
           <>
-            <View className="mb-6">
-              <Text className="text-xl font-bold text-slate-900 dark:text-white mb-4">Performance</Text>
-              <View className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
-                <Text className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-4">Weekly Reps Volume</Text>
-                
-                <View className="h-48 flex-row items-end justify-between px-2">
-                    {weeklyData.length > 0 ? weeklyData.map((day, i) => (
-                        <View key={i} className="items-center flex-1">
-                            <View 
-                                className="w-8 bg-blue-500 rounded-t-lg" 
-                                style={{ height: `${Math.min(day.reps, 150)}%` }} 
-                            />
-                            <Text className="text-[10px] text-slate-400 mt-2">{day._id.split('-').pop()}</Text>
+            <View className="flex-row gap-4 mb-8">
+              <View className="flex-1 bg-white/5 border border-white/10 p-5 rounded-[32px]">
+                 <Text className="text-white/40 text-[10px] uppercase font-bold tracking-widest mb-1">Avg Score</Text>
+                 <Text className="text-4xl font-black text-primary">{progressData?.averageScore || 0}%</Text>
+              </View>
+              <View className="flex-1 bg-white/5 border border-white/10 p-5 rounded-[32px]">
+                 <Text className="text-white/40 text-[10px] uppercase font-bold tracking-widest mb-1">Streak</Text>
+                 <View className="flex-row items-center gap-1">
+                    <Text className="text-4xl font-black text-orange-500">{progressData?.streak || 0}</Text>
+                    <MaterialIcons name="bolt" size={20} color="#f97316" />
+                 </View>
+              </View>
+            </View>
+
+            <View className="mb-10">
+              <Text className="text-lg font-bold text-white mb-6 px-1">Weekly Intensity</Text>
+              <View className="bg-white/5 border border-white/10 rounded-[40px] p-8">
+                <View className="h-44 flex-row items-end justify-between gap-3">
+                    {Array.isArray(progressData?.chartData) && progressData.chartData.length > 0 ? progressData.chartData.map((day: any, i: number) => {
+                        const maxVal = Math.max(...progressData.chartData.map((d: any) => d.value), 1);
+                        const height = (day.value / maxVal) * 100;
+
+                        return (
+                            <View key={i} className="items-center flex-1 h-full gap-4">
+                                <View className="w-full bg-white/5 rounded-full flex-1 justify-end overflow-hidden">
+                                    <View 
+                                        className="w-full bg-primary rounded-full shadow-lg shadow-primary/20" 
+                                        style={{ height: `${Math.max(10, height)}%` }} 
+                                    />
+                                </View>
+                                <Text className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{day.label}</Text>
+                            </View>
+                        )
+                    }) : (
+                        <View className="w-full h-full items-center justify-center">
+                             <Text className="text-white/20 uppercase font-bold text-[10px] tracking-widest">No activity recorded</Text>
                         </View>
-                    )) : (
-                        <Text className="text-slate-500 text-center w-full">No data for this week yet.</Text>
                     )}
                 </View>
               </View>
             </View>
 
-            <View className="flex-row flex-wrap gap-4 mb-6">
-              <View className="flex-1 min-w-[45%] bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <View className="flex-row items-center gap-2 mb-2">
-                  <MaterialIcons name="fitness-center" size={20} color="#2563eb" />
-                  <Text className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Sessions</Text>
-                </View>
-                <Text className="text-3xl font-bold text-slate-900 dark:text-white">
-                  {weeklyData.reduce((acc, curr) => acc + curr.count, 0)}
-                </Text>
-              </View>
-
-              <View className="flex-1 min-w-[45%] bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <View className="flex-row items-center gap-2 mb-2">
-                  <MaterialIcons name="local-fire-department" size={20} color="#f97316" />
-                  <Text className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Reps</Text>
-                </View>
-                <Text className="text-3xl font-bold text-slate-900 dark:text-white">
-                  {weeklyData.reduce((acc, curr) => acc + curr.reps, 0)}
-                </Text>
-              </View>
-            </View>
-
             <View className="mb-6">
-              <Text className="text-lg font-bold text-slate-900 dark:text-white mb-3">Daily Breakdown</Text>
-              {weeklyData.map((day, i) => (
-                <View key={i} className="flex-row items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-xl mb-3 border border-slate-200 dark:border-slate-700">
-                  <View>
-                    <Text className="text-sm font-bold text-slate-900 dark:text-white">{day._id}</Text>
-                    <Text className="text-xs text-slate-500">{day.count} Workouts</Text>
+              <View className="flex-row items-center justify-between mb-6 px-1">
+                <Text className="text-lg font-bold text-white">Recent Sessions</Text>
+                <TouchableOpacity>
+                   <Text className="text-xs font-bold text-primary uppercase">Export</Text>
+                </TouchableOpacity>
+              </View>
+
+              {Array.isArray(progressData?.workoutHistory) && progressData.workoutHistory.length > 0 ? progressData.workoutHistory.map((session: any, i: number) => (
+                <View key={i || session.id} className="flex-row items-center justify-between p-5 bg-white/5 rounded-3xl mb-4 border border-white/10">
+                  <View className="flex-row items-center gap-4">
+                    <View className="w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center border border-primary/20">
+                       <MaterialIcons name="fitness-center" size={20} color="#0df20d" />
+                    </View>
+                    <View>
+                      <Text className="text-sm font-bold text-white">{session.exercise}</Text>
+                      <Text className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">
+                          {new Date(session.date).toLocaleDateString()} • {session.accuracy}% ACCURACY
+                      </Text>
+                    </View>
                   </View>
-                  <Text className="text-sm font-bold text-blue-500">{day.reps} Reps</Text>
+                  <View className="items-end">
+                    <Text className="text-lg font-black text-white">{session.reps}</Text>
+                    <Text className="text-[10px] font-bold text-white/30 uppercase">Reps</Text>
+                  </View>
                 </View>
-              ))}
+              )) : (
+                 <View className="bg-white/5 border border-white/5 border-dashed p-10 rounded-3xl items-center">
+                    <Text className="text-white/20 font-bold uppercase text-[10px] tracking-widest">No history yet</Text>
+                 </View>
+              )}
             </View>
           </>
         )}
