@@ -50,3 +50,20 @@ export const completeWorkout = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ success: false, message: 'Server error completing workout' });
     }
 };
+
+export const saveWorkoutSession = async (req: AuthRequest, res: Response) => {
+    try {
+        const { exerciseName, totalReps, duration, caloriesBurned, formAccuracy } = req.body;
+        const result = await workoutService.saveMLSession(req.user.id, {
+            exerciseName,
+            totalReps,
+            duration,
+            caloriesBurned,
+            formAccuracy
+        });
+        res.status(201).json({ success: true, message: 'Workout session saved successfully.', data: result });
+    } catch (error: any) {
+        console.error('Error saving workout session:', error);
+        res.status(500).json({ success: false, message: 'Server error saving workout session' });
+    }
+};

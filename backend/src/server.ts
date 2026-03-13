@@ -8,6 +8,8 @@ import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/authRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import workoutRoutes from './routes/workoutRoutes';
+import { saveWorkoutSession } from './controllers/workoutController';
+import { protect } from './middleware/authMiddleware';
 import connectDB from './config/db';
 
 const app: Express = express();
@@ -32,6 +34,7 @@ app.use('/api/auth', limiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/workouts', workoutRoutes);
+app.post('/api/workout-session', protect as any, saveWorkoutSession as any);
 
 // Root route
 app.get('/', (req: Request, res: Response) => {
