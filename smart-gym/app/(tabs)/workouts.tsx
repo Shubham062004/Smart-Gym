@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TextInput, ImageBackground, TouchableOpacity, SafeAreaView, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TextInput, ImageBackground, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useWorkout } from '../../src/hooks/useWorkout';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Workouts() {
   const router = useRouter();
@@ -21,108 +22,121 @@ export default function Workouts() {
   const workoutsToDisplay = searchQuery ? searchResults : todayWorkout;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
+    <SafeAreaView className="flex-1 bg-black">
       {/* Header */}
-      <View className="flex-row items-center justify-between p-4 sticky top-0 z-10 bg-gray-50 dark:bg-slate-900">
-        <TouchableOpacity className="w-12 h-12 flex items-center justify-center rounded-full" onPress={() => router.back()}>
-          <MaterialIcons name="arrow-back" size={24} color="#0f172a" />
+      <View className="flex-row items-center justify-between px-6 py-6 bg-black border-b border-white/5">
+        <TouchableOpacity 
+          className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10"
+          onPress={() => router.back()}
+        >
+          <MaterialIcons name="arrow-back" size={20} color="white" />
         </TouchableOpacity>
-        <Text className="text-slate-900 dark:text-white text-lg font-bold flex-1 text-center">Workouts</Text>
-        <View className="w-12" />
+        <Text className="text-white text-xl font-bold tracking-tight">Workouts</Text>
+        <View className="w-10" />
       </View>
 
       {/* Search Bar */}
-      <View className="px-4 py-2 bg-gray-50 dark:bg-slate-900 z-10">
-        <View className="flex-row w-full h-12 items-center bg-white dark:bg-slate-800 rounded-xl shadow-sm px-4">
-          <MaterialIcons name="search" size={24} color="#9da6b9" />
+      <View className="px-6 py-4 bg-black">
+        <View className="flex-row w-full h-14 items-center bg-white/5 border border-white/10 rounded-2xl px-4 shadow-sm">
+          <MaterialIcons name="search" size={22} color="#64748b" />
           <TextInput 
-            className="flex-1 ml-2 text-base text-slate-900 dark:text-white h-full"
-            placeholder="Search exercises"
-            placeholderTextColor="#9da6b9"
+            className="flex-1 ml-3 text-base text-white font-medium"
+            placeholder="Search exercises..."
+            placeholderTextColor="#64748b"
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
         </View>
-        {(isSearching || isLoadingToday) && <ActivityIndicator style={{ marginTop: 8 }} />}
+        {(isSearching || isLoadingToday) && (
+            <ActivityIndicator style={{ marginTop: 12 }} color="#0df20d" />
+        )}
       </View>
 
-      {/* Scrollable Content */}
-      <ScrollView className="flex-1 px-4 pt-2" contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* Featured Workout (Hero) */}
+      <ScrollView className="flex-1 px-6" contentContainerStyle={{ paddingBottom: 120 }}>
+        {/* Featured Section */}
         {!searchQuery && (
-          <TouchableOpacity className="w-full h-48 rounded-xl overflow-hidden mb-4">
-            <ImageBackground 
-              source={{ uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuAkspqenVL7k2eDqEgd5QgXFH4BG-f6VlrWVfW_P8J7HDIT9-h4i4Q9Sx73dQpq-aQI-u92jbuyuQy67ow1-Ebtb1vMaiXCihet3Tu2u2O1EmTnokiQ-2BO27BGQtIdtZeMtVZJmPDHcrEWuML4fiv1KiA_PJDMD_iSs73M9ZTWteaWkvPGkkjzHHjbKtVicEZjDaidcN6I_ZYpe7SIQH-LgJywvwv4W91yARCLWjQ945r4Ipl_sEOS4oBY0awIZjoUIsFROkmziEg" }} 
-              className="w-full h-full"
-              resizeMode="cover"
+          <View className="mb-10">
+            <Text className="text-white/40 text-[10px] uppercase font-bold tracking-[2px] mb-4">Recommended for you</Text>
+            <TouchableOpacity 
+              className="w-full h-64 rounded-[40px] overflow-hidden shadow-2xl shadow-primary/20"
+              onPress={() => handleStartWorkout('featured_id')}
             >
-              <View className="absolute inset-0 bg-black/40" />
-              <View className="absolute bottom-0 left-0 p-4 w-full flex-row justify-between items-end">
-                <View>
-                  <View className="bg-white/20 px-2 py-1 mb-2 rounded-md self-start">
-                    <Text className="text-xs font-semibold tracking-wide text-blue-400 uppercase">Trending</Text>
-                  </View>
-                  <Text className="text-white text-xl font-bold">Full Body Crush</Text>
-                  <Text className="text-gray-300 text-sm mt-1">Advanced • 45 mins</Text>
-                </View>
-                <View className="bg-blue-600 rounded-full p-3 shadow-lg">
-                  <MaterialIcons name="play-arrow" size={24} color="white" />
-                </View>
-              </View>
-            </ImageBackground>
-          </TouchableOpacity>
+              <ImageBackground 
+                source={{ uri: "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=800" }} 
+                className="w-full h-full"
+                resizeMode="cover"
+              >
+                <View className="absolute inset-0 bg-black/40" />
+                <LinearGradient colors={['transparent', 'rgba(0,0,0,0.9)']} className="absolute inset-0 p-8 justify-end">
+                    <View className="flex-row items-center gap-2 mb-3">
+                        <View className="bg-primary/20 p-2 rounded-lg border border-primary/30">
+                            <MaterialIcons name="bolt" size={16} color="#0df20d" />
+                        </View>
+                        <Text className="text-primary font-bold text-xs uppercase tracking-widest">Master Class</Text>
+                    </View>
+                    <Text className="text-white text-3xl font-black">Full Body Intensity</Text>
+                    <View className="flex-row items-center gap-4 mt-2">
+                        <Text className="text-white/60 text-sm font-bold">Hard • 45 MIN</Text>
+                    </View>
+                </LinearGradient>
+              </ImageBackground>
+            </TouchableOpacity>
+          </View>
         )}
 
-        <View className="h-px bg-slate-200 dark:bg-slate-800 my-2" />
-        <Text className="text-slate-900 dark:text-white text-base font-bold px-1 mb-4">
-          {searchQuery ? 'Search Results' : "Today's Plan"}
-        </Text>
+        <View className="flex-row items-center justify-between mb-6">
+            <Text className="text-lg font-bold text-white">
+                {searchQuery ? 'Search Results' : "Full Library"}
+            </Text>
+            <View className="w-8 h-8 rounded-full bg-white/5 items-center justify-center border border-white/10">
+                <MaterialIcons name="filter-list" size={16} color="white" />
+            </View>
+        </View>
 
-        {(workoutsToDisplay || []).map((item: any) => (
-          <TouchableOpacity key={item.id || item._id} className="flex-row items-stretch gap-4 rounded-xl bg-white dark:bg-slate-800 p-3 shadow-sm border border-slate-100 dark:border-slate-700 mb-4">
-            <ImageBackground 
-              source={{ uri: item.image || item.imageUrl || "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=500&h=500&fit=crop" }} 
-              className="w-24 h-32 rounded-lg overflow-hidden shrink-0"
-              resizeMode="cover"
-            >
-              <View className="absolute inset-0 bg-black/20" />
-            </ImageBackground>
-            <View className="flex-1 justify-between py-1">
-              <View className="flex-row justify-between items-start">
-                <View className="flex-1">
-                  <Text className="text-slate-900 dark:text-white text-lg font-bold">{item.name}</Text>
-                  <View className="flex-row items-center gap-2 mt-1">
-                    <Text className="text-slate-500 text-sm">{item.difficulty}</Text>
-                    <Text className="text-slate-500 text-xs">•</Text>
-                    <Text className="text-slate-500 text-sm">{item.duration}{typeof item.duration === 'number' ? ' mins' : ''}</Text>
-                  </View>
+        {Array.isArray(workoutsToDisplay) && workoutsToDisplay.length > 0 ? workoutsToDisplay.map((item: any) => (
+          <TouchableOpacity 
+            key={item.id || item._id} 
+            className="bg-white/5 rounded-[32px] p-2 mb-4 border border-white/10 shadow-sm"
+            onPress={() => item.isLocked ? null : handleStartWorkout(item.id || item._id)}
+          >
+            <View className="flex-row items-center gap-4">
+                <View className="w-24 h-24 rounded-[24px] overflow-hidden bg-white/5 border border-white/10">
+                    <ImageBackground 
+                        source={{ uri: item.image || "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=300" }}
+                        className="w-full h-full"
+                    >
+                        {item.isLocked && (
+                            <View className="absolute inset-0 bg-black/60 items-center justify-center">
+                                <MaterialIcons name="lock" size={24} color="#64748b" />
+                            </View>
+                        )}
+                    </ImageBackground>
                 </View>
-                <View className="bg-indigo-100 dark:bg-indigo-500/20 px-2 py-1 rounded border border-indigo-200 dark:border-indigo-500/20 flex-row items-center gap-1">
-                  <MaterialIcons name="smart-toy" size={12} color="#4f46e5" />
-                  <Text className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">AI Tracked</Text>
+                <View className="flex-1 pr-2">
+                    <Text className={`text-base font-bold mb-1 ${item.isLocked ? 'text-white/30' : 'text-white'}`}>{item.name}</Text>
+                    <View className="flex-row items-center gap-2">
+                        <Text className="text-[10px] font-bold text-white/40 uppercase tracking-tighter">{item.difficulty}</Text>
+                        <Text className="text-white/20">•</Text>
+                        <Text className="text-[10px] font-bold text-white/40 uppercase tracking-tighter">{item.duration} MIN</Text>
+                    </View>
+                    <View className="mt-3 flex-row items-center gap-1.5 self-start bg-primary/10 px-2 py-1 rounded-full border border-primary/20">
+                         <MaterialIcons name="center-focus-weak" size={10} color="#0df20d" />
+                         <Text className="text-[9px] font-bold text-primary uppercase">AI Tracked</Text>
+                    </View>
                 </View>
-              </View>
-              <View className="flex-row items-end justify-between mt-3">
-                <View className="flex-row -space-x-2">
-                  <View className="w-6 h-6 rounded-full bg-slate-700 border-2 border-white flex items-center justify-center"><Text className="text-[8px] text-white">JD</Text></View>
-                  <View className="w-6 h-6 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center"><Text className="text-[8px] text-white">+3</Text></View>
+                <View className="pr-4">
+                    <View className={`w-10 h-10 rounded-full items-center justify-center ${item.isLocked ? 'bg-white/5' : 'bg-primary shadow-lg shadow-primary/20'}`}>
+                        <MaterialIcons name={item.isLocked ? "lock" : "play-arrow"} size={24} color={item.isLocked ? "#334155" : "black"} />
+                    </View>
                 </View>
-                <TouchableOpacity 
-                  className="flex-row items-center justify-center rounded-full h-9 px-5 bg-blue-600 text-white gap-2 shadow-lg"
-                  onPress={() => handleStartWorkout(item.id || item._id)}
-                >
-                  <MaterialIcons name="play-arrow" size={18} color="white" />
-                  <Text className="text-white text-sm font-medium">Start</Text>
-                </TouchableOpacity>
-              </View>
             </View>
           </TouchableOpacity>
-        ))}
-
-        {!workoutsToDisplay?.length && !isSearching && !isLoadingToday && (
-          <Text className="text-slate-500 text-center py-10">No workouts found.</Text>
+        )) : (
+            <View className="py-20 items-center opacity-40">
+                <MaterialIcons name="search-off" size={48} color="white" />
+                <Text className="text-white mt-4 font-bold text-xs uppercase tracking-widest">No matching workouts</Text>
+            </View>
         )}
-
       </ScrollView>
     </SafeAreaView>
   );

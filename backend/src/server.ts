@@ -6,9 +6,13 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import workoutRoutes from './routes/workoutRoutes';
-import { saveWorkoutSession } from './controllers/workoutController';
+import aiRoutes from './routes/aiRoutes';
+import progressRoutes from './routes/progressRoutes';
+import dietRoutes from './routes/dietRoutes';
+import { startWorkout, completeWorkout } from './controllers/workoutController';
 import { protect } from './middleware/authMiddleware';
 import connectDB from './config/db';
 
@@ -32,9 +36,17 @@ app.use('/api/auth', limiter);
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/workouts', workoutRoutes);
-app.post('/api/workout-session', protect as any, saveWorkoutSession as any);
+app.use('/api/diet', dietRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/progress', progressRoutes);
+
+// Workout Session Routes
+app.post('/api/workout-session/start', protect as any, startWorkout as any);
+app.post('/api/workout-session/finish', protect as any, completeWorkout as any);
+app.get('/api/workout-history', protect as any, (req: any, res: any) => res.status(200).json([])); // Mock history for now
 
 // Root route
 app.get('/', (req: Request, res: Response) => {

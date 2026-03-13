@@ -9,9 +9,14 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shubh.smartgym",
+      "infoPlist": {
+        "NSCameraUsageDescription": "OnlyFitness needs access to your camera to track your workout form."
+      }
     },
     "android": {
+      "package": "com.shubh.smartgym",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -19,7 +24,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "output": "static",
@@ -40,11 +48,24 @@
         }
       ],
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "OnlyFitness needs access to your camera to track your workout form.",
+          "enableMicrophonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "31a2278c-9f68-4ceb-9dc7-b8b21fc72599"
+      }
     }
   }
 }

@@ -1,11 +1,12 @@
+import WorkoutSession from '../models/WorkoutSession';
 import UserStats from '../models/UserStats';
 import Workout from '../models/Workout';
+import mongoose from 'mongoose';
 
 export const getDashboardSummary = async (userId: string) => {
     let stats = await UserStats.findOne({ userId });
     
     if (!stats) {
-        // Create initial stats if none exist
         stats = await UserStats.create({
             userId,
             totalReps: 0,
@@ -15,11 +16,32 @@ export const getDashboardSummary = async (userId: string) => {
         });
     }
 
+    // Calculate weekly activity [M, T, W, T, F, S, S]
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const weeklySessions = await WorkoutSession.aggregate([
+        { $match: { userId: new mongoose.Types.ObjectId(userId), completedAt: { $gte: sevenDaysAgo } } },
+        { $group: {
+            _id: { $dayOfWeek: "$completedAt" }, // 1 (Sun) to 7 (Sat)
+            count: { $sum: 1 }
+        }}
+    ]);
+
+    const weeklyActivity = [0, 0, 0, 0, 0, 0, 0]; // Sun to Sat order by default in mongo dayOfWeek? 
+    // Actually $dayOfWeek is 1-7 (Sun-Sat).
+    // Let's map to [M, T, W, T, F, S, S] which is [2, 3, 4, 5, 6, 7, 1]
+    const dayMap = [2, 3, 4, 5, 6, 7, 1];
+    weeklySessions.forEach(session => {
+        const index = dayMap.indexOf(session._id);
+        if (index !== -1) weeklyActivity[index] = session.count;
+    });
+
     return {
         totalReps: stats.totalReps,
-        workoutDuration: stats.workoutDuration,
+        durationMinutes: stats.workoutDuration,
         caloriesBurned: stats.caloriesBurned,
-        weeklyProgress: stats.weeklyProgress,
+        weeklyActivity: weeklyActivity
     };
 };
 

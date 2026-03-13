@@ -1,174 +1,127 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import axiosClient from '../../src/api/axiosClient';
+
+const { width } = Dimensions.get('window');
 
 export default function Progress() {
   const router = useRouter();
+  const [progressData, setProgressData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        const response = await axiosClient.get('/progress/weekly');
+        setProgressData(response.data.data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProgress();
+  }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
-      {/* Header */}
-      <View className="flex-row items-center justify-between p-4 pt-6 pb-2 sticky top-0 z-10 bg-gray-50/95 dark:bg-slate-900/95">
+    <SafeAreaView className="flex-1 bg-black">
+      <View className="flex-row items-center justify-between p-6 bg-black border-b border-white/5">
         <TouchableOpacity 
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800"
+          className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10"
           onPress={() => router.back()}
         >
-          <MaterialIcons name="arrow-back" size={24} color="#0f172a" className="dark:color-white" />
+          <MaterialIcons name="arrow-back" size={20} color="white" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold leading-tight tracking-tight text-slate-900 dark:text-white flex-1 text-center">Your Progress</Text>
-        <TouchableOpacity className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800">
-          <MaterialIcons name="share" size={24} color="#0f172a" className="dark:color-white" />
-        </TouchableOpacity>
+        <Text className="text-xl font-bold text-white tracking-tight">Performance Analytics</Text>
+        <View className="w-10" />
       </View>
 
-      <ScrollView className="flex-1 px-4 py-2" contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* Filters */}
-        <View className="mb-4">
-          <Text className="text-base font-medium text-slate-500 dark:text-slate-400 mb-2">Exercise Type</Text>
-          <View className="relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 flex-row justify-between items-center shadow-sm">
-            <Text className="text-slate-900 dark:text-white font-medium">Full Body Workout</Text>
-            <MaterialIcons name="expand-more" size={20} color="#64748b" />
+      <ScrollView className="flex-1 px-6 pt-6" contentContainerStyle={{ paddingBottom: 120 }}>
+        {isLoading ? (
+          <View className="mt-20">
+            <ActivityIndicator size="large" color="#0df20d" />
+            <Text className="text-white/40 text-center mt-4 uppercase tracking-widest text-[10px] font-bold">Fetching Analytics...</Text>
           </View>
-        </View>
-
-        {/* Performance Graph Section */}
-        <View className="mb-6">
-          <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-xl font-bold text-slate-900 dark:text-white">Performance</Text>
-            <View className="flex-row bg-slate-200 dark:bg-slate-800 rounded-lg p-1">
-              <TouchableOpacity className="px-3 py-1 bg-transparent rounded"><Text className="text-xs font-bold text-slate-600 dark:text-slate-400">W</Text></TouchableOpacity>
-              <TouchableOpacity className="px-3 py-1 bg-white dark:bg-blue-600 rounded shadow-sm"><Text className="text-xs font-bold text-blue-600 dark:text-white">M</Text></TouchableOpacity>
-              <TouchableOpacity className="px-3 py-1 bg-transparent rounded"><Text className="text-xs font-bold text-slate-600 dark:text-slate-400">Y</Text></TouchableOpacity>
-            </View>
-          </View>
-
-          <View className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
-            <View className="flex-row items-end gap-3 mb-6">
-              <View>
-                <Text className="text-sm text-slate-500 dark:text-slate-400 font-medium">Average Score</Text>
-                <Text className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">85%</Text>
+        ) : (
+          <>
+            <View className="flex-row gap-4 mb-8">
+              <View className="flex-1 bg-white/5 border border-white/10 p-5 rounded-[32px]">
+                 <Text className="text-white/40 text-[10px] uppercase font-bold tracking-widest mb-1">Avg Score</Text>
+                 <Text className="text-4xl font-black text-primary">{progressData?.averageScore || 0}%</Text>
               </View>
-              <View className="flex-row items-center gap-1 mb-1.5 px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-500/10">
-                <MaterialIcons name="trending-up" size={14} color="#22c55e" />
-                <Text className="text-xs font-bold text-green-500">+5%</Text>
+              <View className="flex-1 bg-white/5 border border-white/10 p-5 rounded-[32px]">
+                 <Text className="text-white/40 text-[10px] uppercase font-bold tracking-widest mb-1">Streak</Text>
+                 <View className="flex-row items-center gap-1">
+                    <Text className="text-4xl font-black text-orange-500">{progressData?.streak || 0}</Text>
+                    <MaterialIcons name="bolt" size={20} color="#f97316" />
+                 </View>
               </View>
             </View>
 
-            {/* Simulated Graph */}
-            <View className="relative h-48 w-full justify-between pb-6">
-                {/* Lines */}
-                <View className="absolute w-full h-full justify-between pb-6 opacity-30">
-                  <View className="border-b border-dashed border-slate-300 dark:border-slate-600 h-0" />
-                  <View className="border-b border-dashed border-slate-300 dark:border-slate-600 h-0" />
-                  <View className="border-b border-dashed border-slate-300 dark:border-slate-600 h-0" />
-                  <View className="border-b border-dashed border-slate-300 dark:border-slate-600 h-0" />
-                  <View className="border-b border-slate-300 dark:border-slate-600 h-0" />
-                </View>
+            <View className="mb-10">
+              <Text className="text-lg font-bold text-white mb-6 px-1">Weekly Intensity</Text>
+              <View className="bg-white/5 border border-white/10 rounded-[40px] p-8">
+                <View className="h-44 flex-row items-end justify-between gap-3">
+                    {Array.isArray(progressData?.chartData) && progressData.chartData.length > 0 ? progressData.chartData.map((day: any, i: number) => {
+                        const maxVal = Math.max(...progressData.chartData.map((d: any) => d.value), 1);
+                        const height = (day.value / maxVal) * 100;
 
-                {/* Simulated Path Overlay using points */}
-                <View className="absolute w-full top-6 h-32 flex-row justify-between items-end px-2">
-                    <View className="w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800 translate-y-[-10px] z-10" />
-                    <View className="w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800 translate-y-[-25px] z-10" />
-                    <View className="w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800 translate-y-[-40px] z-10" />
-                    <View className="w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800 translate-y-[-20px] z-10" />
-                    <View className="w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800 translate-y-[-50px] z-10" />
-                    <View className="w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800 translate-y-[-90px] z-10" />
-                    <View className="w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800 translate-y-[-60px] z-10" />
-                </View>
-                <View className="absolute bottom-0 w-full flex-row justify-between pt-2">
-                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-                      <Text key={day} className="text-xs font-medium text-slate-400 dark:text-slate-500">{day}</Text>
-                    ))}
-                </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Stats Cards Grid */}
-        <View className="flex-row flex-wrap gap-4 mb-6">
-          <View className="flex-1 min-w-[45%] bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
-            <View className="absolute right-0 top-0 p-3 opacity-10"><MaterialIcons name="fitness-center" size={64} color="#258cf4" /></View>
-            <View className="flex-row items-center gap-2 mb-2">
-              <View className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/40 text-blue-500">
-                <MaterialIcons name="fitness-center" size={20} color="#2563eb" />
-              </View>
-              <Text className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Workouts</Text>
-            </View>
-            <View>
-              <Text className="text-3xl font-bold text-slate-900 dark:text-white">24</Text>
-              <Text className="text-xs text-slate-400 mt-1">Sessions completed</Text>
-            </View>
-          </View>
-
-          <View className="flex-1 min-w-[45%] bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
-            <View className="absolute right-0 top-0 p-3 opacity-10"><MaterialIcons name="local-fire-department" size={64} color="#f97316" /></View>
-            <View className="flex-row items-center gap-2 mb-2">
-              <View className="p-1.5 rounded-lg bg-orange-50 dark:bg-orange-500/10 text-orange-500">
-                <MaterialIcons name="local-fire-department" size={20} color="#f97316" />
-              </View>
-              <Text className="text-xs font-medium text-slate-500 dark:text-slate-400">Current Streak</Text>
-            </View>
-            <View>
-              <Text className="text-3xl font-bold text-slate-900 dark:text-white">5</Text>
-              <Text className="text-xs text-slate-400 mt-1">Days in a row</Text>
-            </View>
-          </View>
-
-          <View className="w-full bg-blue-600 p-5 rounded-2xl shadow-lg flex-row items-center justify-between relative overflow-hidden">
-            <View className="absolute right-[-20] bottom-[-20] opacity-30"><MaterialIcons name="emoji-events" size={150} color="white" /></View>
-            <View className="z-10">
-              <View className="flex-row items-center gap-2 mb-2">
-                <MaterialIcons name="emoji-events" size={20} color="#bfdbfe" />
-                <Text className="text-sm font-medium text-blue-100">Best Performance</Text>
-              </View>
-              <Text className="text-4xl font-bold text-white">98%</Text>
-              <Text className="text-xs text-blue-100 mt-1">Squat accuracy achieved on Oct 24</Text>
-            </View>
-            <View className="z-10 w-16 h-16 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
-              <MaterialIcons name="emoji-events" size={32} color="white" />
-            </View>
-          </View>
-        </View>
-
-        {/* Recent History */}
-        <View className="mb-6">
-          <Text className="text-lg font-bold text-slate-900 dark:text-white mb-3">Recent History</Text>
-          <View className="flex-col gap-3">
-            <View className="flex-row items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-              <View className="flex-row items-center gap-3">
-                <View className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                  <MaterialIcons name="directions-run" size={20} color="#64748b" />
-                </View>
-                <View>
-                  <Text className="text-sm font-bold text-slate-900 dark:text-white">Morning Cardio</Text>
-                  <Text className="text-xs text-slate-500">Today, 8:00 AM</Text>
+                        return (
+                            <View key={i} className="items-center flex-1 h-full gap-4">
+                                <View className="w-full bg-white/5 rounded-full flex-1 justify-end overflow-hidden">
+                                    <View 
+                                        className="w-full bg-primary rounded-full shadow-lg shadow-primary/20" 
+                                        style={{ height: `${Math.max(10, height)}%` }} 
+                                    />
+                                </View>
+                                <Text className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{day.label}</Text>
+                            </View>
+                        )
+                    }) : (
+                        <View className="w-full h-full items-center justify-center">
+                             <Text className="text-white/20 uppercase font-bold text-[10px] tracking-widest">No activity recorded</Text>
+                        </View>
+                    )}
                 </View>
               </View>
-              <View className="items-end">
-                <Text className="text-sm font-bold text-green-500">92%</Text>
-                <Text className="text-xs text-slate-500">Score</Text>
-              </View>
             </View>
 
-            <View className="flex-row items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-              <View className="flex-row items-center gap-3">
-                <View className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                  <MaterialIcons name="fitness-center" size={20} color="#64748b" />
-                </View>
-                <View>
-                  <Text className="text-sm font-bold text-slate-900 dark:text-white">Upper Body</Text>
-                  <Text className="text-xs text-slate-500">Yesterday, 6:30 PM</Text>
-                </View>
+            <View className="mb-6">
+              <View className="flex-row items-center justify-between mb-6 px-1">
+                <Text className="text-lg font-bold text-white">Recent Sessions</Text>
+                <TouchableOpacity>
+                   <Text className="text-xs font-bold text-primary uppercase">Export</Text>
+                </TouchableOpacity>
               </View>
-              <View className="items-end">
-                <Text className="text-sm font-bold text-blue-500">88%</Text>
-                <Text className="text-xs text-slate-500">Score</Text>
-              </View>
-            </View>
-          </View>
-        </View>
 
+              {Array.isArray(progressData?.workoutHistory) && progressData.workoutHistory.length > 0 ? progressData.workoutHistory.map((session: any, i: number) => (
+                <View key={i || session.id} className="flex-row items-center justify-between p-5 bg-white/5 rounded-3xl mb-4 border border-white/10">
+                  <View className="flex-row items-center gap-4">
+                    <View className="w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center border border-primary/20">
+                       <MaterialIcons name="fitness-center" size={20} color="#0df20d" />
+                    </View>
+                    <View>
+                      <Text className="text-sm font-bold text-white">{session.exercise}</Text>
+                      <Text className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">
+                          {new Date(session.date).toLocaleDateString()} • {session.accuracy}% ACCURACY
+                      </Text>
+                    </View>
+                  </View>
+                  <View className="items-end">
+                    <Text className="text-lg font-black text-white">{session.reps}</Text>
+                    <Text className="text-[10px] font-bold text-white/30 uppercase">Reps</Text>
+                  </View>
+                </View>
+              )) : (
+                 <View className="bg-white/5 border border-white/5 border-dashed p-10 rounded-3xl items-center">
+                    <Text className="text-white/20 font-bold uppercase text-[10px] tracking-widest">No history yet</Text>
+                 </View>
+              )}
+            </View>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
