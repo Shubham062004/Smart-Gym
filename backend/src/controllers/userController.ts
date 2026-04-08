@@ -35,3 +35,26 @@ export const getUserStats = async (req: any, res: Response) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+export const updateSettings = async (req: any, res: Response) => {
+    try {
+        const { darkMode, notifications } = req.body;
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { $set: { "preferences.darkMode": darkMode, "preferences.notifications": notifications } },
+            { new: true, strict: false }
+        );
+        res.status(200).json({ darkMode, notifications });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const deleteAccount = async (req: any, res: Response) => {
+    try {
+        await User.findByIdAndDelete(req.user.id);
+        res.status(200).json({ message: 'Account deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};

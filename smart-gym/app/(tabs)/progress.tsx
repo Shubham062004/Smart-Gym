@@ -14,8 +14,8 @@ export default function Progress() {
   useEffect(() => {
     const fetchProgress = async () => {
       try {
-        const response = await axiosClient.get('/progress/weekly');
-        setProgressData(response.data.data);
+        const response = await axiosClient.get('progress/weekly');
+        setProgressData(response.data.data || response.data);
       } catch (error) {
         console.error(error);
       } finally {
@@ -38,7 +38,7 @@ export default function Progress() {
         <View className="w-10" />
       </View>
 
-      <ScrollView className="flex-1 px-6 pt-6" contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView className="flex-1 px-6 pt-6" contentContainerStyle={{ paddingBottom: 24 }}>
         {isLoading ? (
           <View className="mt-20">
             <ActivityIndicator size="large" color="#0df20d" />

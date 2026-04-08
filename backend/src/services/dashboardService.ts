@@ -41,7 +41,8 @@ export const getDashboardSummary = async (userId: string) => {
         totalReps: stats.totalReps,
         durationMinutes: stats.workoutDuration,
         caloriesBurned: stats.caloriesBurned,
-        weeklyActivity: weeklyActivity
+        weeklyActivity: weeklyActivity,
+        streak: weeklySessions.length > 0 ? weeklySessions.length : 0 // Basic streak calculation based on recent days
     };
 };
 

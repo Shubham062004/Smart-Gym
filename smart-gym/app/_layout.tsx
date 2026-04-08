@@ -36,6 +36,9 @@ function useProtectedRoute(user: any) {
   }, [user, segments]);
 }
 
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { View, Platform } from 'react-native';
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const loaded = true; // Temporary bypass for missing fonts
@@ -59,12 +62,16 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <StackScreen />
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </QueryClientProvider>
+    <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <View className="flex-1 pt-10 bg-gray-50 dark:bg-slate-900">
+            <StackScreen />
+          </View>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </SafeAreaProvider>
   );
 }
 

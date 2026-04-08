@@ -75,11 +75,13 @@ export default function DietPlanScreen() {
                                 <MaterialIcons name="restaurant" size={28} color="#0df20d" />
                             </View>
                             <View className="flex-1">
-                                <View className="flex-row justify-between items-start mb-1">
-                                    <Text className="text-white font-bold text-base">{meal.name}</Text>
+                                <View className="mb-1">
+                                    <Text className="text-white font-bold text-base pr-2" numberOfLines={2}>{meal.name}</Text>
+                                </View>
+                                <View className="flex-row justify-between items-center">
+                                    <Text className="text-white/40 text-xs flex-1 pr-2" numberOfLines={1}>{meal.description}</Text>
                                     <Text className="text-primary font-bold text-xs">{meal.calories} kcal</Text>
                                 </View>
-                                <Text className="text-white/40 text-xs leading-relaxed">{meal.description}</Text>
                             </View>
                         </View>
                     </View>

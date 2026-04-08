@@ -22,7 +22,7 @@ export default function History() {
         <View className="w-10" />
       </View>
 
-      <ScrollView className="flex-1 px-6 pt-4" contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView className="flex-1 px-6 pt-4" contentContainerStyle={{ paddingBottom: 24 }}>
         {isLoadingHistory ? (
           <View className="mt-20">
             <ActivityIndicator size="large" color="#0df20d" />
