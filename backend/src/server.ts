@@ -22,9 +22,15 @@ const app: Express = express();
 connectDB();
 
 // Middleware
-app.use(helmet()); // Security headers
-app.use(cors()); // Allow cross-origin requests
-app.use(express.json()); // Parse JSON bodies
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+
+// Request Logger
+app.use((req: Request, res: Response, next: NextFunction) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
 
 // Rate limiting
 const limiter = rateLimit({

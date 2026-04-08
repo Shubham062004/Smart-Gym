@@ -9,7 +9,7 @@ import { useProfile } from '../src/hooks/useProfile';
 import { useAuthStore } from '../src/store/authStore';
 
 const profileSchema = z.object({
-  fullName: z.string().min(2, 'Name is required'),
+  name: z.string().min(2, 'Name is required'),
   age: z.number(),
   height: z.number(),
   weight: z.number(),
@@ -25,7 +25,7 @@ export default function EditProfile() {
   const { control, handleSubmit, formState: { errors } } = useForm<any>({
     resolver: zodResolver(profileSchema) as any,
     defaultValues: {
-      fullName: user?.fullName || '',
+      name: user?.name || '',
       age: user?.age || 0,
       height: user?.height || 0,
       weight: user?.weight || 0,
@@ -66,7 +66,7 @@ export default function EditProfile() {
             <Text className="text-sm font-semibold text-slate-500 mb-2">Full Name</Text>
             <Controller
               control={control}
-              name="fullName"
+              name="name"
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
                   className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
@@ -78,7 +78,7 @@ export default function EditProfile() {
                 />
               )}
             />
-            {errors.fullName && <Text className="text-red-500 text-xs mt-1">{errors.fullName.message as string}</Text>}
+            {errors.name && <Text className="text-red-500 text-xs mt-1">{errors.name.message as string}</Text>}
           </View>
 
           <View className="flex-row gap-4">

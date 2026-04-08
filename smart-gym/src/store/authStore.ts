@@ -34,7 +34,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (token) {
         // We need auth headers for this request, axiosClient interceptor handles it
         const { default: axiosClient } = await import('../api/axiosClient');
-        const response = await axiosClient.get('/auth/me');
+        const response = await axiosClient.get('auth/me');
         set({ user: response.data.user, token, isAuthenticated: true });
       }
     } catch (e) {

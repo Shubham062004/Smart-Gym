@@ -35,11 +35,19 @@ export const useProfile = () => {
     },
   });
 
+  const deleteAccountMutation = useMutation({
+    mutationFn: userService.deleteAccount,
+    onSuccess: () => {
+      // additional cleanup could happen here
+    },
+  });
+
   return {
     profile: profileQuery.data,
     isLoadingProfile: profileQuery.isLoading,
     updateProfile: updateProfileMutation.mutate,
     isUpdatingProfile: updateProfileMutation.isPending,
     updateSettings: updateSettingsMutation.mutate,
+    deleteAccount: deleteAccountMutation.mutate,
   };
 };

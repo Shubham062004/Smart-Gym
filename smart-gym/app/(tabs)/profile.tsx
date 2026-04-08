@@ -3,10 +3,12 @@ import { View, Text, ScrollView, ImageBackground, TouchableOpacity, SafeAreaView
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/store/authStore';
+import { useDashboard } from '../../src/hooks/useDashboard';
 
 export default function Profile() {
   const router = useRouter();
   const { user } = useAuthStore();
+  const { summary } = useDashboard();
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
@@ -24,7 +26,7 @@ export default function Profile() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1 px-4 mb-20 gap-8">
+      <ScrollView className="flex-1 px-4 gap-8" contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
         {/* Profile Hero Section */}
         <View className="flex-col items-center pt-4">
           <View className="relative">
@@ -76,14 +78,14 @@ export default function Profile() {
                   <MaterialIcons name="trending-up" size={10} color="#22c55e" />
                 </View>
               </View>
-              <Text className="text-2xl font-bold text-slate-900 dark:text-white">124</Text>
-              <Text className="text-slate-500 text-xs font-medium">Total Workouts</Text>
+              <Text className="text-2xl font-bold text-slate-900 dark:text-white">{summary?.weeklyActivity ? summary.weeklyActivity.reduce((a:number, b:number) => a+b, 0) : 0}</Text>
+              <Text className="text-slate-500 text-xs font-medium">Weekly Workouts</Text>
             </View>
             <View className="flex-1 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-900 rounded-xl p-4">
               <View className="flex-row justify-between items-start mb-2">
                 <MaterialIcons name="local-fire-department" size={24} color="#f97316" />
               </View>
-              <Text className="text-2xl font-bold text-slate-900 dark:text-white">18,420</Text>
+              <Text className="text-2xl font-bold text-slate-900 dark:text-white">{summary?.caloriesBurned || 0}</Text>
               <Text className="text-slate-500 text-xs font-medium">Calories Burned</Text>
             </View>
           </View>
@@ -94,18 +96,20 @@ export default function Profile() {
           <View className="flex-row justify-between items-center mb-4">
             <View className="flex-row items-center gap-2">
               <MaterialIcons name="bolt" size={24} color="#f97316" />
-              <Text className="font-bold text-slate-900 dark:text-white">12 Day Streak</Text>
+              <Text className="font-bold text-slate-900 dark:text-white">{summary?.streak || 0} Day Streak</Text>
             </View>
-            <Text className="text-blue-600 text-xs font-bold">Keep it up!</Text>
+            <Text className="text-blue-600 text-xs font-bold">{summary?.streak && summary.streak > 0 ? 'Keep it up!' : 'Start today!'}</Text>
           </View>
           <View className="flex-row justify-between items-center">
-            {['M','T','W','T','F','S','S'].map((day, i) => (
+            {['M','T','W','T','F','S','S'].map((day, i) => {
+              const isActive = summary?.weeklyActivity && summary.weeklyActivity[i] > 0;
+              return (
               <View key={i} className="flex-col items-center gap-2">
-                <View className={`w-8 h-8 rounded-full ${i < 4 ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'} flex items-center justify-center`}>
-                  <Text className={`text-xs ${i < 4 ? 'text-white' : 'text-slate-400'}`}>{day}</Text>
+                <View className={`w-8 h-8 rounded-full ${isActive ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'} flex items-center justify-center`}>
+                  <Text className={`text-xs ${isActive ? 'text-white' : 'text-slate-400'}`}>{day}</Text>
                 </View>
               </View>
-            ))}
+            )})}
           </View>
         </View>
 
@@ -138,7 +142,7 @@ export default function Profile() {
         </View>
 
         {/* CTA */}
-        <View className="pt-4 pb-10">
+        <View className="pt-4 pb-4">
           <TouchableOpacity className="w-full bg-blue-600 items-center justify-center py-4 rounded-xl shadow-lg" onPress={() => router.push('/edit-profile' as any)}>
             <Text className="text-white font-bold text-lg">Update Profile</Text>
           </TouchableOpacity>

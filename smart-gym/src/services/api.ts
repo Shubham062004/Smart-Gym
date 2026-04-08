@@ -9,7 +9,7 @@ if (debuggerHost) {
   localIp = debuggerHost.split(':')[0];
 }
 
-const BASE_URL = `http://${localIp}:5000/api`;
+const BASE_URL = `http://${localIp}:5000/api/`;
 
 const api = axios.create({
   baseURL: BASE_URL,

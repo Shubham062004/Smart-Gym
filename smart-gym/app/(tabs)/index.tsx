@@ -32,7 +32,7 @@ export default function Homepage() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
-      <ScrollView className="flex-1 pb-20">
+      <ScrollView className="flex-1 pb-6">
         {/* Header Section */}
         <View className="flex-row items-center justify-between p-6 pt-4">
           <TouchableOpacity className="flex-row items-center gap-3" onPress={() => router.push('/profile')}>
@@ -45,12 +45,12 @@ export default function Homepage() {
             </View>
             <View>
               <Text className="text-sm font-medium text-slate-500 dark:text-slate-400">Welcome back,</Text>
-              <Text className="text-xl font-bold text-slate-900 dark:text-white leading-tight">{user?.fullName || 'User'}</Text>
+              <Text className="text-xl font-bold text-slate-900 dark:text-white leading-tight">{user?.name || 'User'}</Text>
             </View>
           </TouchableOpacity>
           <View className="flex-row items-center gap-1.5 bg-orange-100 dark:bg-orange-500/20 px-3 py-1.5 rounded-full border border-orange-500/20">
             <MaterialIcons name="local-fire-department" size={20} color="#f97316" />
-            <Text className="text-sm font-bold text-orange-600 dark:text-orange-400">12</Text>
+            <Text className="text-sm font-bold text-orange-600 dark:text-orange-400">{summary?.streak || 0}</Text>
           </View>
         </View>
 

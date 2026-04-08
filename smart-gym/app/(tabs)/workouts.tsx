@@ -52,7 +52,7 @@ export default function Workouts() {
         )}
       </View>
 
-      <ScrollView className="flex-1 px-6" contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView className="flex-1 px-6" contentContainerStyle={{ paddingBottom: 24 }}>
         {/* Featured Section */}
         {!searchQuery && (
           <View className="mb-10">

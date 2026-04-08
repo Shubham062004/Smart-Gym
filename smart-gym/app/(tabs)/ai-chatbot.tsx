@@ -3,7 +3,6 @@ import { View, Text, FlatList, TouchableOpacity, TextInput, SafeAreaView, Keyboa
 import { MaterialIcons } from '@expo/vector-icons';
 import { aiService } from '../../src/services/aiService';
 import { useAuthStore } from '../../src/store/authStore';
-import { useHeaderHeight } from '@react-navigation/elements';
 
 interface Message {
     id: string;
@@ -14,7 +13,6 @@ interface Message {
 
 export default function AIChatbotScreen() {
     const { user } = useAuthStore();
-    const headerHeight = useHeaderHeight();
     const [messages, setMessages] = useState<Message[]>([
         { id: '1', role: 'ai', content: "Hello! I'm your OnlyFitness AI Coach. How can I help you reach your goals today?" }
     ]);
@@ -123,9 +121,9 @@ export default function AIChatbotScreen() {
     return (
         <SafeAreaView className="flex-1 bg-black">
             <KeyboardAvoidingView 
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
                 className="flex-1"
-                keyboardVerticalOffset={headerHeight + (Platform.OS === 'ios' ? 0 : 20)}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
             >
                 <View className="flex-row items-center px-6 py-4 bg-black border-b border-white/5">
                     <View className="w-10 h-10 rounded-full bg-primary/20 items-center justify-center border border-primary/30">

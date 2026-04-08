@@ -36,13 +36,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="ai-chatbot"
-        options={{
-          title: 'Chat',
-          tabBarIcon: ({ color }) => <MaterialIcons name="chat" size={28} color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="progress"
         options={{
           title: 'Progress',
@@ -62,6 +55,13 @@ export default function TabLayout() {
             </View>
           ),
           tabBarLabel: 'Progress',
+        }}
+      />
+      <Tabs.Screen
+        name="ai-chatbot"
+        options={{
+          title: 'Chat',
+          tabBarIcon: ({ color }) => <MaterialIcons name="chat" size={28} color={color} />,
         }}
       />
       <Tabs.Screen
