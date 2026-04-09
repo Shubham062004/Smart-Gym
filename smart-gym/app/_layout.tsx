@@ -10,6 +10,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { storage } from '../src/utils/storage';
 import { useAuthStore } from '../src/store/authStore';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { View, Platform } from 'react-native';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -35,9 +37,6 @@ function useProtectedRoute(user: any) {
     }
   }, [user, segments]);
 }
-
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { View, Platform } from 'react-native';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
