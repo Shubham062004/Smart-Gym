@@ -1,42 +1,47 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useAuthStore } from '../src/store/authStore';
 import OnboardingScreen1 from './onboarding1';
-import OnboardingScreen2 from './onboarding2';
-import OnboardingScreen3 from './onboarding3';
 
-export default function OnboardingFlow() {
-  const [currentScreen, setCurrentScreen] = useState(0);
+export default function Index() {
   const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuthStore();
 
-  const handleNext = () => {
-    if (currentScreen < 2) {
-      setCurrentScreen(currentScreen + 1);
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      // Already logged in → skip onboarding, go straight to dashboard
+      router.replace('/(tabs)');
     }
-  };
+  }, [isAuthenticated, isLoading]);
 
-  const handleSkip = () => {
-    router.push('/(tabs)');
-  };
+  // Still loading auth state — show spinner
+  if (isLoading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#0df20d" />
+      </View>
+    );
+  }
 
-  const handleGetStarted = () => {
-    router.push('/login' as any);
-  };
+  // Not logged in → show onboarding 1, "Get Started" button goes to login
+  if (!isAuthenticated) {
+    return (
+      <OnboardingScreen1
+        onNext={() => router.push('/login' as any)}
+        onSkip={() => router.push('/login' as any)}
+      />
+    );
+  }
 
-  const screens = [
-    <OnboardingScreen1
-      key="screen1"
-      onNext={handleNext}
-      onSkip={handleSkip}
-    />,
-    <OnboardingScreen2
-      key="screen2"
-      onNext={handleNext}
-    />,
-    <OnboardingScreen3
-      key="screen3"
-      onGetStarted={handleGetStarted}
-    />,
-  ];
-
-  return screens[currentScreen];
+  return null;
 }
+
+const styles = StyleSheet.create({
+  loader: {
+    flex: 1,
+    backgroundColor: '#0a0f0a',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

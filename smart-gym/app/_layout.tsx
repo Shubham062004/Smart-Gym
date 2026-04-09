@@ -26,7 +26,7 @@ function useProtectedRoute(user: any) {
     const inTabsGroup = segments[0] === '(tabs)';
     
     // Check if user is on authentication pages
-    const isAuthPage = ['login', 'signup', 'verify-otp', 'onboarding1', 'onboarding2', 'onboarding3', 'index'].includes(segments[0] || '');
+    const isAuthPage = ['login', 'signup', 'verify-otp', 'onboarding1', 'index'].includes(segments[0] || '');
 
     if (!user && inTabsGroup) {
       // If not authenticated and trying to access tabs, redirect to login
@@ -79,8 +79,6 @@ function StackScreen() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="onboarding1" />
-      <Stack.Screen name="onboarding2" />
-      <Stack.Screen name="onboarding3" />
       <Stack.Screen name="login" />
       <Stack.Screen name="signup" />
       <Stack.Screen name="verify-otp" />

@@ -247,11 +247,12 @@ export default function WorkoutScreen() {
         ref={cameraRef}
         mute={true}
         flash="off"
+        animateShutter={false}
       />
 
       {/* ── Skeleton SVG Overlay ──────────────────────────────────────── */}
       <SkeletonOverlay
-        keypoints={keypoints}
+        keypoints={keypoints as any[]}
         postureScore={formAccuracy}
         width={width}
         height={height}

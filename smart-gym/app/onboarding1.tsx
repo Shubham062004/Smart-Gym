@@ -114,19 +114,13 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({
 
         {/* Bottom Controls */}
         <View style={styles.bottomControls}>
-          <View style={styles.dotsRow}>
-            <View style={[styles.dot, styles.dotActive]} />
-            <View style={styles.dot} />
-            <View style={styles.dot} />
-          </View>
-
           <TouchableOpacity
             style={styles.nextButton}
             onPress={onNext}
             activeOpacity={0.85}
           >
-            <Text style={styles.nextButtonText}>Next</Text>
-            <ArrowForwardIcon />
+            <Text style={styles.nextButtonText}>Get Started</Text>
+            {/* <ArrowForwardIcon /> */}
           </TouchableOpacity>
         </View>
 
