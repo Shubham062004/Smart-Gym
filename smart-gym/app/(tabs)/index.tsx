@@ -16,7 +16,7 @@ export default function Homepage() {
   const handleStartWorkout = async (workoutId: string) => {
     try {
       await startWorkout(workoutId);
-      router.push('/workout-camera' as any);
+      router.push('/workout-screen' as any);
     } catch (e) {
       console.warn("Could not start workout", e);
     }
