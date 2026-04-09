@@ -1,47 +1,25 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'expo-router';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { useAuthStore } from '../src/store/authStore';
 import OnboardingScreen1 from './onboarding1';
 
+/**
+ * index.tsx — App entry point for unauthenticated users.
+ *
+ * Auth routing is handled entirely by useProtectedRoute() in _layout.tsx:
+ *   - Authenticated → redirected to /(tabs) before this screen renders
+ *   - Not authenticated on (tabs) → redirected to /login
+ *
+ * This screen simply renders Onboarding 1, whose single button goes to /login.
+ */
 export default function Index() {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuthStore();
 
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      // Already logged in → skip onboarding, go straight to dashboard
-      router.replace('/(tabs)');
-    }
-  }, [isAuthenticated, isLoading]);
+  const goToLogin = () => router.push('/login' as any);
 
-  // Still loading auth state — show spinner
-  if (isLoading) {
-    return (
-      <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#0df20d" />
-      </View>
-    );
-  }
-
-  // Not logged in → show onboarding 1, "Get Started" button goes to login
-  if (!isAuthenticated) {
-    return (
-      <OnboardingScreen1
-        onNext={() => router.push('/login' as any)}
-        onSkip={() => router.push('/login' as any)}
-      />
-    );
-  }
-
-  return null;
+  return (
+    <OnboardingScreen1
+      onNext={goToLogin}
+      onSkip={goToLogin}
+    />
+  );
 }
-
-const styles = StyleSheet.create({
-  loader: {
-    flex: 1,
-    backgroundColor: '#0a0f0a',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
