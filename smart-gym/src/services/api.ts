@@ -3,20 +3,17 @@ import { storage } from '../utils/storage';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
-// ── API Base URL ──────────────────────────────────────────────────────────────
-// In development: auto-detect local machine IP via Expo so the phone can reach
-//   the backend running on the same WiFi (works on both Android & iOS).
-// In production: use the deployed Render URL.
-const RENDER_URL = 'https://smart-gym-emwi.onrender.com/api';
+// Production backend (Render)
+const RENDER_URL = 'https://smart-gym-backend-x1w0.onrender.com/api';
 
-const getLocalUrl = () => {
-  const debuggerHost = Constants.expoConfig?.hostUri;
-  let ip = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-  if (debuggerHost) ip = debuggerHost.split(':')[0];
-  return `http://${ip}:5000/api/`;
-};
+// Local dev: auto-detect machine IP so the phone can reach the server on WiFi
+const debuggerHost = Constants.expoConfig?.hostUri;
+let localIp = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+if (debuggerHost) {
+  localIp = debuggerHost.split(':')[0];
+}
 
-const BASE_URL = __DEV__ ? getLocalUrl() : RENDER_URL;
+const BASE_URL = __DEV__ ? `http://${localIp}:5000/api/` : RENDER_URL;
 
 const api = axios.create({
   baseURL: BASE_URL,

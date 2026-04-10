@@ -17,20 +17,6 @@
 import React, { useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
-import type { Keypoint } from './SkeletonOverlay';
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-export interface PoseDetectionHandle {
-  processFrame: (base64jpeg: string) => void;
-}
-
-interface PoseDetectionViewProps {
-  onKeypoints: (kps: Keypoint[], detected: boolean) => void;
-  onModelReady: () => void;
-  onError: (msg: string) => void;
-  onStatus?: (msg: string) => void;
-}
 
 const ML_HTML = `<!DOCTYPE html>
 <html><head>
@@ -139,20 +125,20 @@ const ML_HTML = `<!DOCTYPE html>
 </script>
 </body></html>`;
 
-const PoseDetectionView = forwardRef<PoseDetectionHandle, PoseDetectionViewProps>(
-  function PoseDetectionView(
-    { onKeypoints, onModelReady, onError, onStatus },
-    ref
-  ) {
-  const webviewRef = useRef<WebView>(null);
+const PoseDetectionView = forwardRef(function PoseDetectionView(
+  { onKeypoints, onModelReady, onError, onStatus },
+  ref
+) {
+  const webviewRef = useRef(null);
 
   /* Expose processFrame() to parent via ref */
   useImperativeHandle(ref, () => ({
-    processFrame: (base64jpeg: string) => {
+    processFrame: (base64jpeg) => {
       if (!webviewRef.current || !base64jpeg) return;
+      /* Strip any data-URI prefix if present */
       const b64 = base64jpeg.replace(/^data:image\/\w+;base64,/, '');
       const js = `window.processFrame && window.processFrame(${JSON.stringify(b64)}); void(0);`;
-      (webviewRef.current as any).injectJavaScript(js);
+      webviewRef.current.injectJavaScript(js);
     },
   }), []);
 
@@ -168,7 +154,7 @@ const PoseDetectionView = forwardRef<PoseDetectionHandle, PoseDetectionViewProps
       } else if (data.type === 'status' && onStatus) {
         onStatus(data.message);
       }
-    } catch (_) {}
+    } catch (_) { }
   }, [onKeypoints, onModelReady, onError, onStatus]);
 
   return (
@@ -184,8 +170,7 @@ const PoseDetectionView = forwardRef<PoseDetectionHandle, PoseDetectionViewProps
       onMessage={handleMessage}
     />
   );
-  })
-);
+});
 
 const styles = StyleSheet.create({
   /* Hidden — 1×1 off-screen, still renders its JS */

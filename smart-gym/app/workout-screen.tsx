@@ -18,17 +18,17 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import axiosClient from '../src/api/axiosClient';
 import { analyzePosture } from '../src/ml/postureAnalyzer';
-import SkeletonOverlay, { type Keypoint } from '../src/components/SkeletonOverlay';
-import PoseDetectionView, { type PoseDetectionHandle } from '../src/components/PoseDetectionView';
+import SkeletonOverlay from '../src/components/SkeletonOverlay';
+import PoseDetectionView from '../src/components/PoseDetectionView';
 
 const { width, height } = Dimensions.get('window');
 
 const EXERCISE_MAP: Record<string, { name: string; id: string }> = {
-  squats:     { name: 'Back Squats',  id: 'squats' },
-  pushups:    { name: 'Push-ups',     id: 'pushups' },
-  bicep_curl: { name: 'Bicep Curls',  id: 'bicep_curl' },
-  deadlift:   { name: 'Deadlift',     id: 'deadlift' },
-  lunges:     { name: 'Lunges',       id: 'lunges' },
+  squats: { name: 'Back Squats', id: 'squats' },
+  pushups: { name: 'Push-ups', id: 'pushups' },
+  bicep_curl: { name: 'Bicep Curls', id: 'bicep_curl' },
+  deadlift: { name: 'Deadlift', id: 'deadlift' },
+  lunges: { name: 'Lunges', id: 'lunges' },
 };
 
 // Interval between camera frame captures for ML inference (ms)
@@ -41,26 +41,26 @@ export default function WorkoutScreen() {
   const exercise = EXERCISE_MAP[exerciseKey] || EXERCISE_MAP.squats;
 
   const [permission, requestPermission] = useCameraPermissions();
-  const cameraRef   = useRef<any>(null);
-  const mlViewRef   = useRef<PoseDetectionHandle>(null);
-  const captureRef  = useRef<ReturnType<typeof setInterval> | null>(null);
+  const cameraRef = useRef<any>(null);
+  const mlViewRef = useRef<any>(null);
+  const captureRef = useRef<any>(null);
 
   // ── Workout State ──────────────────────────────────────────────────────────
-  const [reps, setReps]             = useState(0);
-  const [time, setTime]             = useState(0);
-  const [isPaused, setIsPaused]     = useState(true);
+  const [reps, setReps] = useState(0);
+  const [time, setTime] = useState(0);
+  const [isPaused, setIsPaused] = useState(true);
   const [modelReady, setModelReady] = useState(false);
   const [modelStatus, setModelStatus] = useState('Loading AI model…');
   const [modelError, setModelError] = useState<string | null>(null);
   const [humanDetected, setHumanDetected] = useState(false);
-  const [keypoints, setKeypoints]   = useState<Keypoint[]>([]);
+  const [keypoints, setKeypoints] = useState<any[]>([]);
   const [formAccuracy, setFormAccuracy] = useState(0);
-  const [metrics, setMetrics]       = useState<any[]>([]);
-  const [feedback, setFeedback]     = useState('Waiting for AI model…');
+  const [metrics, setMetrics] = useState<any[]>([]);
+  const [feedback, setFeedback] = useState('Waiting for AI model…');
 
-  const timerRef      = useRef<ReturnType<typeof setInterval> | null>(null);
-  const prevScoreRef  = useRef<number>(0);
-  const capturingRef  = useRef<boolean>(false);
+  const timerRef = useRef<any>(null);
+  const prevScoreRef = useRef(0);
+  const capturingRef = useRef(false);
 
   // ── Draggable Bottom Sheet ─────────────────────────────────────────────────
   const MAX_DOWN = height * 0.48;
@@ -80,8 +80,8 @@ export default function WorkoutScreen() {
         const cur = (panY as any)._value || 0;
         const target =
           g.dy > 50 || g.vy > 0.5 ? MAX_DOWN :
-          g.dy < -50 || g.vy < -0.5 ? 0 :
-          cur > MAX_DOWN / 2 ? MAX_DOWN : 0;
+            g.dy < -50 || g.vy < -0.5 ? 0 :
+              cur > MAX_DOWN / 2 ? MAX_DOWN : 0;
         Animated.spring(panY, { toValue: target, useNativeDriver: true, bounciness: 0 }).start();
       },
     })
@@ -142,7 +142,7 @@ export default function WorkoutScreen() {
   }, [isPaused, modelReady, permission?.granted, captureAndSend]);
 
   // ── Receive Keypoints from ML WebView ─────────────────────────────────────
-  const handleKeypoints = useCallback((kps: Keypoint[], detected: boolean) => {
+  const handleKeypoints = useCallback((kps: any[], detected: boolean) => {
     setHumanDetected(detected);
     setKeypoints(kps || []);
 
@@ -211,9 +211,9 @@ export default function WorkoutScreen() {
   };
 
   // ── Derived colours ────────────────────────────────────────────────────────
-  const scoreColor   = formAccuracy >= 90 ? '#0df20d' : formAccuracy >= 70 ? '#f97316' : '#ef4444';
-  const humanColor   = humanDetected ? '#0df20d' : 'rgba(255,255,255,0.4)';
-  const badgeLabel   = !modelReady ? modelStatus.toUpperCase() : humanDetected ? 'HUMAN DETECTED' : 'SEARCHING…';
+  const scoreColor = formAccuracy >= 90 ? '#0df20d' : formAccuracy >= 70 ? '#f97316' : '#ef4444';
+  const humanColor = humanDetected ? '#0df20d' : 'rgba(255,255,255,0.4)';
+  const badgeLabel = !modelReady ? modelStatus.toUpperCase() : humanDetected ? 'HUMAN DETECTED' : 'SEARCHING…';
 
   // ── Permission Guards ──────────────────────────────────────────────────────
   if (!permission) {
@@ -252,7 +252,7 @@ export default function WorkoutScreen() {
 
       {/* ── Skeleton SVG Overlay ──────────────────────────────────────── */}
       <SkeletonOverlay
-        keypoints={keypoints}
+        keypoints={keypoints as any[]}
         postureScore={formAccuracy}
         width={width}
         height={height}
@@ -412,10 +412,10 @@ export default function WorkoutScreen() {
                   {!modelReady
                     ? `⏳ ${modelStatus}`
                     : isPaused
-                    ? '▶ Press play to start tracking'
-                    : !humanDetected
-                    ? '👁 Step into camera frame'
-                    : '🔄 Analysing joints…'}
+                      ? '▶ Press play to start tracking'
+                      : !humanDetected
+                        ? '👁 Step into camera frame'
+                        : '🔄 Analysing joints…'}
                 </Text>
               ) : (
                 metrics.map((m, i) => (
@@ -471,58 +471,58 @@ export default function WorkoutScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:    { flex: 1, backgroundColor: '#0a0f0a' },
-  centered:     { flex: 1, backgroundColor: '#0a0f0a', justifyContent: 'center', alignItems: 'center', padding: 24 },
-  loadingText:  { color: '#0df20d', fontSize: 14, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2, marginTop: 16, textAlign: 'center' },
+  container: { flex: 1, backgroundColor: '#0a0f0a' },
+  centered: { flex: 1, backgroundColor: '#0a0f0a', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  loadingText: { color: '#0df20d', fontSize: 14, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2, marginTop: 16, textAlign: 'center' },
   permissionBtn: { backgroundColor: '#0df20d', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 24, marginTop: 20 },
   permissionBtnText: { color: '#000', fontWeight: 'bold', fontSize: 15 },
-  safeArea:     { position: 'absolute', width: '100%', height: '100%', zIndex: 10 },
-  topSection:   { height: height * 0.50, justifyContent: 'space-between', paddingBottom: 20 },
-  header:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 24, paddingTop: 16 },
+  safeArea: { position: 'absolute', width: '100%', height: '100%', zIndex: 10 },
+  topSection: { height: height * 0.50, justifyContent: 'space-between', paddingBottom: 20 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 24, paddingTop: 16 },
   glassIconBtn: { backgroundColor: 'rgba(255,255,255,0.05)', padding: 10, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   headerCenter: { alignItems: 'center' },
   liveTrackingBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.08)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, marginBottom: 4 },
-  pulsingDot:   { width: 6, height: 6, borderRadius: 3, marginRight: 6 },
+  pulsingDot: { width: 6, height: 6, borderRadius: 3, marginRight: 6 },
   liveTrackingText: { fontSize: 10, fontWeight: 'bold', letterSpacing: 1.5 },
   exerciseTitle: { color: '#FFF', fontSize: 18, fontWeight: 'bold', letterSpacing: 0.5 },
   repContainer: { alignItems: 'center', gap: 10 },
-  scoreRing:    { width: 160, height: 160, borderRadius: 80, borderWidth: 4, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' },
-  repNumber:    { fontSize: 72, fontWeight: 'bold', color: '#FFF', lineHeight: 80 },
-  repLabel:     { fontSize: 14, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2 },
+  scoreRing: { width: 160, height: 160, borderRadius: 80, borderWidth: 4, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' },
+  repNumber: { fontSize: 72, fontWeight: 'bold', color: '#FFF', lineHeight: 80 },
+  repLabel: { fontSize: 14, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2 },
   feedbackBadge: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
-  feedbackText:  { fontWeight: 'bold', fontSize: 13 },
-  scoreRow:     { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  scoreLabel:   { fontSize: 12, fontWeight: 'bold', letterSpacing: 2 },
-  scoreValue:   { fontSize: 22, fontWeight: 'bold' },
+  feedbackText: { fontWeight: 'bold', fontSize: 13 },
+  scoreRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  scoreLabel: { fontSize: 12, fontWeight: 'bold', letterSpacing: 2 },
+  scoreValue: { fontSize: 22, fontWeight: 'bold' },
   detailsBounce: { alignItems: 'center', opacity: 0.7 },
-  detailsText:  { color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 'bold', letterSpacing: 2, marginBottom: 2 },
+  detailsText: { color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 'bold', letterSpacing: 2, marginBottom: 2 },
   bottomSheetContainer: { flex: 1, backgroundColor: 'rgba(10,15,10,0.96)', borderTopLeftRadius: 40, borderTopRightRadius: 40, borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.08)', marginTop: -20, overflow: 'hidden' },
-  bottomSheet:  { flex: 1 },
+  bottomSheet: { flex: 1 },
   bottomSheetContent: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 40 },
-  dragHandle:   { width: 48, height: 5, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.2)', alignSelf: 'center', marginBottom: 20 },
-  errorBanner:  { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(249,115,22,0.1)', borderWidth: 1, borderColor: 'rgba(249,115,22,0.2)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 14 },
+  dragHandle: { width: 48, height: 5, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.2)', alignSelf: 'center', marginBottom: 20 },
+  errorBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(249,115,22,0.1)', borderWidth: 1, borderColor: 'rgba(249,115,22,0.2)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 14 },
   errorBannerText: { color: '#f97316', fontSize: 12, flex: 1 },
-  grid2:        { flexDirection: 'row', gap: 14, marginBottom: 14 },
-  glassPanel:   { flex: 1, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: 22, padding: 18, marginBottom: 14 },
-  panelHeader:  { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  panelTitle:   { color: 'rgba(255,255,255,0.45)', fontSize: 9, fontWeight: 'bold', letterSpacing: 1, marginLeft: 6 },
+  grid2: { flexDirection: 'row', gap: 14, marginBottom: 14 },
+  glassPanel: { flex: 1, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: 22, padding: 18, marginBottom: 14 },
+  panelHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  panelTitle: { color: 'rgba(255,255,255,0.45)', fontSize: 9, fontWeight: 'bold', letterSpacing: 1, marginLeft: 6 },
   metricValueRow: { flexDirection: 'row', alignItems: 'baseline', marginBottom: 8 },
   metricNumber: { fontSize: 30, fontWeight: 'bold', color: '#FFF' },
-  metricUnit:   { fontSize: 11, fontWeight: 'bold', marginLeft: 4 },
+  metricUnit: { fontSize: 11, fontWeight: 'bold', marginLeft: 4 },
   progressBarBg: { height: 4, width: '100%', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' },
   progressBarFill: { height: '100%', borderRadius: 2 },
   detectedBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(13,242,13,0.1)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(13,242,13,0.2)' },
-  detectedDot:   { width: 5, height: 5, borderRadius: 2.5, backgroundColor: '#0df20d', marginRight: 4 },
-  detectedText:  { color: '#0df20d', fontSize: 8, fontWeight: 'bold', letterSpacing: 1 },
-  emptyText:     { color: 'rgba(255,255,255,0.35)', fontSize: 13, textAlign: 'center', paddingVertical: 16, fontStyle: 'italic' },
-  meterRow:      { marginBottom: 14 },
-  meterTopRow:   { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  meterName:     { color: 'rgba(255,255,255,0.55)', fontSize: 10, fontWeight: 'bold', letterSpacing: 1 },
-  meterStatus:   { fontSize: 10, fontWeight: 'bold' },
-  controlsBar:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, marginTop: 10 },
+  detectedDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: '#0df20d', marginRight: 4 },
+  detectedText: { color: '#0df20d', fontSize: 8, fontWeight: 'bold', letterSpacing: 1 },
+  emptyText: { color: 'rgba(255,255,255,0.35)', fontSize: 13, textAlign: 'center', paddingVertical: 16, fontStyle: 'italic' },
+  meterRow: { marginBottom: 14 },
+  meterTopRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  meterName: { color: 'rgba(255,255,255,0.55)', fontSize: 10, fontWeight: 'bold', letterSpacing: 1 },
+  meterStatus: { fontSize: 10, fontWeight: 'bold' },
+  controlsBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, marginTop: 10 },
   controlAction: { alignItems: 'center', gap: 6 },
   controlIconCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', justifyContent: 'center', alignItems: 'center' },
   controlIconCircleRed: { width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(239,68,68,0.1)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)', justifyContent: 'center', alignItems: 'center' },
   controlActionText: { color: 'rgba(255,255,255,0.45)', fontSize: 9, fontWeight: 'bold', letterSpacing: 1 },
-  playPauseBtn:  { width: 72, height: 72, borderRadius: 36, backgroundColor: '#0df20d', justifyContent: 'center', alignItems: 'center', shadowColor: '#0df20d', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.5, shadowRadius: 20 },
+  playPauseBtn: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#0df20d', justifyContent: 'center', alignItems: 'center', shadowColor: '#0df20d', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.5, shadowRadius: 20 },
 });
