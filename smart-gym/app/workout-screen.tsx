@@ -18,8 +18,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import axiosClient from '../src/api/axiosClient';
 import { analyzePosture } from '../src/ml/postureAnalyzer';
-import SkeletonOverlay from '../src/components/SkeletonOverlay';
-import PoseDetectionView from '../src/components/PoseDetectionView';
+import SkeletonOverlay, { type Keypoint } from '../src/components/SkeletonOverlay';
+import PoseDetectionView, { type PoseDetectionHandle } from '../src/components/PoseDetectionView';
 
 const { width, height } = Dimensions.get('window');
 
@@ -42,8 +42,8 @@ export default function WorkoutScreen() {
 
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef   = useRef<any>(null);
-  const mlViewRef   = useRef<any>(null);
-  const captureRef  = useRef<any>(null);
+  const mlViewRef   = useRef<PoseDetectionHandle>(null);
+  const captureRef  = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ── Workout State ──────────────────────────────────────────────────────────
   const [reps, setReps]             = useState(0);
@@ -53,14 +53,14 @@ export default function WorkoutScreen() {
   const [modelStatus, setModelStatus] = useState('Loading AI model…');
   const [modelError, setModelError] = useState<string | null>(null);
   const [humanDetected, setHumanDetected] = useState(false);
-  const [keypoints, setKeypoints]   = useState<any[]>([]);
+  const [keypoints, setKeypoints]   = useState<Keypoint[]>([]);
   const [formAccuracy, setFormAccuracy] = useState(0);
   const [metrics, setMetrics]       = useState<any[]>([]);
   const [feedback, setFeedback]     = useState('Waiting for AI model…');
 
-  const timerRef      = useRef<any>(null);
-  const prevScoreRef  = useRef(0);
-  const capturingRef  = useRef(false);
+  const timerRef      = useRef<ReturnType<typeof setInterval> | null>(null);
+  const prevScoreRef  = useRef<number>(0);
+  const capturingRef  = useRef<boolean>(false);
 
   // ── Draggable Bottom Sheet ─────────────────────────────────────────────────
   const MAX_DOWN = height * 0.48;
@@ -142,7 +142,7 @@ export default function WorkoutScreen() {
   }, [isPaused, modelReady, permission?.granted, captureAndSend]);
 
   // ── Receive Keypoints from ML WebView ─────────────────────────────────────
-  const handleKeypoints = useCallback((kps: any[], detected: boolean) => {
+  const handleKeypoints = useCallback((kps: Keypoint[], detected: boolean) => {
     setHumanDetected(detected);
     setKeypoints(kps || []);
 
@@ -252,7 +252,7 @@ export default function WorkoutScreen() {
 
       {/* ── Skeleton SVG Overlay ──────────────────────────────────────── */}
       <SkeletonOverlay
-        keypoints={keypoints as any[]}
+        keypoints={keypoints}
         postureScore={formAccuracy}
         width={width}
         height={height}
