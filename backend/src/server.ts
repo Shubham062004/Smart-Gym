@@ -23,7 +23,17 @@ connectDB();
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+    origin: [
+        'http://localhost:8081',
+        'http://localhost:19006',
+        'https://smart-gym-emwi.onrender.com',
+        // Allow Expo Go / dev builds on any local IP
+        /^http:\/\/192\.168\..*/,
+        /^http:\/\/10\..*/,
+    ],
+    credentials: true,
+}));
 app.use(express.json());
 
 // Request Logger
@@ -54,9 +64,14 @@ app.post('/api/workout-session/start', protect as any, startWorkout as any);
 app.post('/api/workout-session/finish', protect as any, completeWorkout as any);
 app.get('/api/workout-history', protect as any, (req: any, res: any) => res.status(200).json([])); // Mock history for now
 
+// Health check — used by Render to verify the service is alive
+app.get('/api/health', (_req: Request, res: Response) => {
+    res.status(200).json({ success: true, status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Root route
 app.get('/', (req: Request, res: Response) => {
-    res.status(200).json({ success: true, message: 'OnlyFitness API is running' });
+    res.status(200).json({ success: true, message: 'Smart-Gym API is running 🏋️' });
 });
 
 // Error Handling Middleware
