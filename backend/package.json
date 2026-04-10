@@ -13,6 +13,13 @@
   "description": "",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^22.13.0",
+    "@types/nodemailer": "^8.0.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
@@ -23,18 +30,12 @@
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.4",
-    "nodemailer": "^8.0.2"
-  },
-  "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/mongoose": "^5.11.96",
-    "@types/node": "^22.13.0",
-    "@types/nodemailer": "^8.0.0",
-    "nodemon": "^3.1.14",
+    "nodemailer": "^8.0.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
+
