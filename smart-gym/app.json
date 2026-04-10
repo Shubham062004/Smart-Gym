@@ -48,14 +48,7 @@
         }
       ],
       "expo-secure-store",
-      "expo-web-browser",
-      [
-        "react-native-vision-camera",
-        {
-          "cameraPermissionText": "OnlyFitness needs access to your camera to track your workout form.",
-          "enableMicrophonePermission": false
-        }
-      ]
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
