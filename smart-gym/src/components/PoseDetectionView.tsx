@@ -183,8 +183,7 @@ const PoseDetectionView = forwardRef<PoseDetectionHandle, PoseDetectionViewProps
       onMessage={handleMessage}
     />
   );
-  })
-);
+  });
 
 const styles = StyleSheet.create({
   /* Hidden — 1×1 off-screen, still renders its JS */
