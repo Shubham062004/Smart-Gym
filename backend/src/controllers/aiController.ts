@@ -36,7 +36,8 @@ export const handleAIChat = async (req: Request, res: Response) => {
         dietPlan 
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('[AI Chat Error]:', error);
+    res.status(500).json({ success: false, message: error.message || 'Internal Server Error' });
   }
 };
 
