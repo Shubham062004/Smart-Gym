@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import axiosClient from '../../src/api/axiosClient';
@@ -26,7 +27,7 @@ export default function Progress() {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-black">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
       <View className="flex-row items-center justify-between p-6 bg-black border-b border-white/5">
         <TouchableOpacity 
           className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10"

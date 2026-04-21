@@ -14,13 +14,13 @@ const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 const MIN_SCORE = 0.3;
 
 // Colour coding by confidence
-const jointColor = (score) => {
+const jointColor = (score: number) => {
   if (score >= 0.7) return '#0df20d';   // green – high confidence
   if (score >= 0.4) return '#f97316';   // orange – medium
   return '#ef4444';                      // red – low confidence
 };
 
-const boneColor = (scoreA, scoreB, postureScore) => {
+const boneColor = (scoreA: number, scoreB: number, postureScore: number) => {
   const minConf = Math.min(scoreA, scoreB);
   if (minConf < MIN_SCORE) return 'rgba(255,255,255,0.1)';
   if (postureScore >= 90) return 'rgba(13,242,13,0.7)';
@@ -29,14 +29,20 @@ const boneColor = (scoreA, scoreB, postureScore) => {
 };
 
 const SkeletonOverlay = ({
-  keypoints = [],
+  keypoints = [] as any[],
   postureScore = 0,
   width = SCREEN_W,
   height = SCREEN_H,
   showLabels = false,
+}: {
+  keypoints?: any[];
+  postureScore?: number;
+  width?: number;
+  height?: number;
+  showLabels?: boolean;
 }) => {
   const kpMap = useMemo(() => {
-    const map = {};
+    const map: Record<string, any> = {};
     keypoints.forEach((kp) => { map[kp.name] = kp; });
     return map;
   }, [keypoints]);

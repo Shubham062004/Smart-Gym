@@ -155,7 +155,7 @@ const PoseDetectionView = forwardRef<PoseDetectionHandle, PoseDetectionViewProps
     },
   }), []);
 
-  const handleMessage = useCallback((event) => {
+  const handleMessage = useCallback((event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
       if (data.type === 'keypoints' && onKeypoints) {

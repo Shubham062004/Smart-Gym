@@ -4,20 +4,12 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 // Production backend (Render)
-const RENDER_URL = 'https://smart-gym-backend-x1w0.onrender.com/api';
-
-// Local dev: auto-detect machine IP so the phone can reach the server on WiFi
-const debuggerHost = Constants.expoConfig?.hostUri;
-let localIp = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-if (debuggerHost) {
-  localIp = debuggerHost.split(':')[0];
-}
-
-const BASE_URL = __DEV__ ? `http://${localIp}:5000/api/` : RENDER_URL;
+const BASE_URL = 'https://smart-gym-backend-x1w0.onrender.com/api';
+// const BASE_URL = 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },

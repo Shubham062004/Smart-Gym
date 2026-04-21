@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
 export const generateChatResponse = async (message: string) => {
   const prompt = `You are an AI Fitness Coach for OnlyFitness. Respond to the user's message: "${message}". 

@@ -1,28 +1,48 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TextInput, ImageBackground, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TextInput, ImageBackground, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useWorkout } from '../../src/hooks/useWorkout';
 import { LinearGradient } from 'expo-linear-gradient';
+import { EXERCISES, findExerciseIdByName } from '../../src/features/workout/config/exerciseConfig';
 
 export default function Workouts() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const { searchResults, isSearching, startWorkout, todayWorkout, isLoadingToday } = useWorkout(searchQuery);
 
-  const handleStartWorkout = async (workoutId: string) => {
+  const handleStartWorkout = async (workout: any) => {
+    if (typeof workout === 'string') {
+      try {
+        await startWorkout(workout);
+        router.push({ pathname: '/workout-screen', params: { exercise: 'squats' } } as any);
+      } catch (e) { console.warn("Could not start workout", e); }
+      return;
+    }
+
     try {
-      await startWorkout(workoutId);
-      router.push('/workout-screen' as any);
+      if (workout._id || (workout.id && workout.id.length > 10)) {
+        await startWorkout(workout.id || workout._id);
+      }
+      
+      const exerciseParam = findExerciseIdByName(workout.name || workout.id);
+
+      router.push({
+        pathname: '/workout-screen',
+        params: { exercise: exerciseParam }
+      } as any);
     } catch (e) {
       console.warn("Could not start workout", e);
     }
   };
 
-  const workoutsToDisplay = searchQuery ? searchResults : todayWorkout;
+  const workoutsToDisplay = searchQuery 
+    ? EXERCISES.filter(ex => ex.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : EXERCISES;
 
   return (
-    <SafeAreaView className="flex-1 bg-black">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-6 bg-black border-b border-white/5">
         <TouchableOpacity 
@@ -97,12 +117,12 @@ export default function Workouts() {
           <TouchableOpacity 
             key={item.id || item._id} 
             className="bg-white/5 rounded-[32px] p-2 mb-4 border border-white/10 shadow-sm"
-            onPress={() => item.isLocked ? null : handleStartWorkout(item.id || item._id)}
+            onPress={() => item.isLocked ? null : handleStartWorkout(item)}
           >
             <View className="flex-row items-center gap-4">
                 <View className="w-24 h-24 rounded-[24px] overflow-hidden bg-white/5 border border-white/10">
                     <ImageBackground 
-                        source={{ uri: item.image || "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=300" }}
+                        source={{ uri: item.image }}
                         className="w-full h-full"
                     >
                         {item.isLocked && (

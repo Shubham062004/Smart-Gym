@@ -57,7 +57,7 @@ export default function ForgotPasswordScreen() {
                     </View>
                     <Text style={styles.title}>Forgot Password?</Text>
                     <Text style={styles.description}>
-                        No worries! Enter your email address below and we'll send you an OTP for verification.
+                        No worries! Enter your email address below and we&apos;ll send you an OTP for verification.
                     </Text>
 
                     <View style={styles.card}>

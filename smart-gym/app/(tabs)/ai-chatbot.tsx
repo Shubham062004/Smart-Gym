@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { aiService } from '../../src/services/aiService';
 import { useAuthStore } from '../../src/store/authStore';
@@ -19,6 +20,38 @@ export default function AIChatbotScreen() {
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const flatListRef = useRef<FlatList>(null);
+
+    // Load chat history on mount
+    useEffect(() => {
+        const loadHistory = async () => {
+            try {
+                const { storage } = require('../../src/utils/storage');
+                const savedStr = await storage.getItem('ai_chat_history');
+                if (savedStr) {
+                    const parsed = JSON.parse(savedStr);
+                    if (parsed && parsed.length > 0) {
+                        setMessages(parsed);
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load chat history', e);
+            }
+        };
+        loadHistory();
+    }, []);
+
+    // Save chat history whenever messages change
+    useEffect(() => {
+        const saveHistory = async () => {
+            try {
+                const { storage } = require('../../src/utils/storage');
+                await storage.setItem('ai_chat_history', JSON.stringify(messages));
+            } catch (e) {
+                console.error('Failed to save chat history', e);
+            }
+        };
+        saveHistory();
+    }, [messages]);
 
     const handleSend = async () => {
         if (!inputText.trim() || isLoading) return;
@@ -62,7 +95,8 @@ export default function AIChatbotScreen() {
             }
 
         } catch (error) {
-            setMessages(prev => [...prev, { id: 'err', role: 'ai', content: "Sorry, I'm having trouble connecting right now." }]);
+            console.error('[AI Chatbot Error]:', error);
+            setMessages(prev => [...prev, { id: 'err-' + Date.now().toString(), role: 'ai', content: "Sorry, I'm having trouble connecting right now." }]);
         } finally {
             setIsLoading(false);
         }
@@ -119,10 +153,10 @@ export default function AIChatbotScreen() {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-black">
+        <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
             <KeyboardAvoidingView 
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
-                className="flex-1"
+                style={{ flex: 1 }}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
             >
                 <View className="flex-row items-center px-6 py-4 bg-black border-b border-white/5">
@@ -143,7 +177,7 @@ export default function AIChatbotScreen() {
                     data={messages}
                     renderItem={renderMessage}
                     keyExtractor={item => item.id}
-                    className="flex-1 px-4 pt-4"
+                    style={{ flex: 1, paddingHorizontal: 16, paddingTop: 16 }}
                     contentContainerStyle={{ paddingBottom: 20 }}
                     ListFooterComponent={isLoading ? (
                         <View className="flex-row items-center mb-6 pl-10">
@@ -166,7 +200,8 @@ export default function AIChatbotScreen() {
                         />
                         <TouchableOpacity 
                             onPress={handleSend}
-                            className={`w-10 h-10 rounded-xl items-center justify-center ${inputText.trim() ? 'bg-primary shadow-lg shadow-primary/20' : 'bg-slate-800'}`}
+                            className="w-10 h-10 rounded-xl items-center justify-center"
+                            style={inputText.trim() ? { backgroundColor: '#0df20d', shadowColor: '#0df20d', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.2, shadowRadius: 10, elevation: 5 } : { backgroundColor: '#1e293b' }}
                             disabled={!inputText.trim() || isLoading}
                         >
                             <MaterialIcons name="send" size={18} color={inputText.trim() ? "black" : "#475569"} />

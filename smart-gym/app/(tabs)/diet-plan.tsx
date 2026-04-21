@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, SafeAreaView, Switch, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, Switch, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { aiService } from '../../src/services/aiService';
 import { useAuthStore } from '../../src/store/authStore';
@@ -20,7 +21,7 @@ export default function DietPlanScreen() {
 
     if (isLoading && !diet) {
         return (
-            <SafeAreaView className="flex-1 bg-black items-center justify-center">
+            <SafeAreaView style={{ flex: 1, backgroundColor: "black", alignItems: "center", justifyContent: "center" }}>
                 <ActivityIndicator size="large" color="#0df20d" />
                 <Text className="text-white/50 mt-4">Cooking your plan...</Text>
             </SafeAreaView>
@@ -28,7 +29,7 @@ export default function DietPlanScreen() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-black">
+        <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
             <View className="flex-row items-center justify-between p-6 pt-4">
                 <Text className="text-2xl font-bold text-white tracking-tight">Diet Plan</Text>
                 <TouchableOpacity 
@@ -66,7 +67,7 @@ export default function DietPlanScreen() {
                     </View>
                 </View>
 
-                <Text className="text-lg font-bold text-white mb-6 px-1">Today's Meals</Text>
+                <Text className="text-lg font-bold text-white mb-6 px-1">Today&apos;s Meals</Text>
 
                 {(diet?.meals || []).map((meal: any, idx: number) => (
                     <View key={idx} className="bg-slate-900/40 rounded-3xl border border-white/5 mb-4 overflow-hidden">

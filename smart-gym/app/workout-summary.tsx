@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,7 +16,7 @@ export default function WorkoutSummaryScreen() {
   const formAccuracy = (params.formAccuracy as string) || "0";
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0a0f0a]">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#0a0f0a" }}>
       <ScrollView className="flex-1 px-6 pt-10">
         <View className="items-center mb-10">
             <View className="w-20 h-20 bg-primary/20 rounded-full items-center justify-center mb-4">

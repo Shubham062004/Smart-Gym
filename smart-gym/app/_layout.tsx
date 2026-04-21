@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
@@ -18,11 +18,14 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-function useProtectedRoute(user: any) {
+function useProtectedRoute(user: any, isLoading: boolean) {
   const segments = useSegments();
   const router = useRouter();
+  const navigationState = useRootNavigationState();
 
   useEffect(() => {
+    if (!navigationState?.key || isLoading) return; // Wait until root layout mounts and auth is loaded
+
     const inTabsGroup = segments[0] === '(tabs)';
     
     // Check if user is on authentication pages
@@ -35,7 +38,7 @@ function useProtectedRoute(user: any) {
       // If authenticated and on auth pages, redirect to tabs
       router.replace('/(tabs)');
     }
-  }, [user, segments]);
+  }, [user, segments, navigationState?.key, isLoading]);
 }
 
 export default function RootLayout() {
@@ -48,17 +51,13 @@ export default function RootLayout() {
     loadStoredAuth();
   }, []);
 
-  useProtectedRoute(isAuthenticated);
+  useProtectedRoute(isAuthenticated, isLoading);
 
   useEffect(() => {
     if (loaded && !isLoading) {
       SplashScreen.hideAsync();
     }
   }, [loaded, isLoading]);
-
-  if (!loaded || isLoading) {
-    return null;
-  }
 
   return (
     <SafeAreaProvider>

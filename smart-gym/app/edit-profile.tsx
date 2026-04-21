@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -43,7 +44,7 @@ export default function EditProfile() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
+    <SafeAreaView style={{ flex: 1 }}>
       <View className="flex-row items-center px-4 py-4 bg-gray-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <TouchableOpacity onPress={() => router.back()} className="p-2">
           <MaterialIcons name="arrow-back" size={24} color="#0f172a" className="dark:color-white" />

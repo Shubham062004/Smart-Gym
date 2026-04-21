@@ -17,28 +17,22 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import axiosClient from '../src/api/axiosClient';
-import { analyzePosture } from '../src/ml/postureAnalyzer';
 import SkeletonOverlay from '../src/components/SkeletonOverlay';
 import PoseDetectionView from '../src/components/PoseDetectionView';
+import { analyzeExercise } from '../src/features/workout/ml/exerciseEngine';
+import { getExerciseById } from '../src/features/workout/config/exerciseConfig';
 
 const { width, height } = Dimensions.get('window');
 
-const EXERCISE_MAP: Record<string, { name: string; id: string }> = {
-  squats: { name: 'Back Squats', id: 'squats' },
-  pushups: { name: 'Push-ups', id: 'pushups' },
-  bicep_curl: { name: 'Bicep Curls', id: 'bicep_curl' },
-  deadlift: { name: 'Deadlift', id: 'deadlift' },
-  lunges: { name: 'Lunges', id: 'lunges' },
-};
-
-// Interval between camera frame captures for ML inference (ms)
+// Interval between camera 
+// frame captures for ML inference (ms)
 const CAPTURE_INTERVAL_MS = 500;
 
 export default function WorkoutScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const exerciseKey = (params.exercise as string) || 'squats';
-  const exercise = EXERCISE_MAP[exerciseKey] || EXERCISE_MAP.squats;
+  const exercise = getExerciseById(exerciseKey);
 
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<any>(null);
@@ -59,8 +53,8 @@ export default function WorkoutScreen() {
   const [feedback, setFeedback] = useState('Waiting for AI model…');
 
   const timerRef = useRef<any>(null);
-  const prevScoreRef = useRef(0);
   const capturingRef = useRef(false);
+  const exerciseStateRef = useRef({ stage: 'up', reps: 0, prevScore: 100, feedback: 'Waiting for AI model…' });
 
   // ── Draggable Bottom Sheet ─────────────────────────────────────────────────
   const MAX_DOWN = height * 0.48;
@@ -153,17 +147,31 @@ export default function WorkoutScreen() {
       return;
     }
 
-    const { score, metrics: m, feedback: f } = analyzePosture(kps, exercise.id);
-    setFormAccuracy(score);
-    setMetrics(m);
-    setFeedback(f);
+    const currentState = exerciseStateRef.current;
+    
+    // Process exercise using dynamic engine
+    const result = analyzeExercise(exercise?.id || 'squats', kps, currentState);
 
-    // Rep counter: score drops below 55 (bottom of motion) then recovers ≥ 80 (top)
-    if (prevScoreRef.current < 55 && score >= 80) {
-      setReps(r => r + 1);
+    // Update state ref
+    exerciseStateRef.current = {
+       ...currentState,
+       stage: result.stage,
+       reps: result.reps,
+       prevScore: (result as any).prevScore !== undefined ? (result as any).prevScore : currentState.prevScore,
+       feedback: result.feedback || currentState.feedback
+    };
+
+    // Update UI
+    setFormAccuracy(result.formAccuracy || 0);
+    setMetrics(result.metrics || []);
+    setFeedback(result.feedback);
+    
+    // Update React state for reps if changed
+    if (result.reps !== currentState.reps) {
+       setReps(result.reps);
     }
-    prevScoreRef.current = score;
-  }, [exercise.id]);
+
+  }, [exercise?.id]);
 
   const handleModelReady = useCallback(() => {
     setModelReady(true);
@@ -188,7 +196,7 @@ export default function WorkoutScreen() {
       router.push({
         pathname: '/workout-summary' as any,
         params: {
-          exerciseName: exercise.name,
+          exerciseName: exercise?.name || 'Workout',
           totalReps: reps.toString(),
           duration: Math.round(time).toString(),
           caloriesBurned: Math.round(time * 0.15).toString(),
@@ -202,7 +210,7 @@ export default function WorkoutScreen() {
   const handleFinish = () => {
     setIsPaused(true);
     saveSessionMutation.mutate({
-      exerciseName: exercise.name,
+      exerciseName: exercise?.name || 'Workout',
       totalReps: reps,
       duration: Math.round(time),
       caloriesBurned: Math.round(time * 0.15),
@@ -252,7 +260,7 @@ export default function WorkoutScreen() {
 
       {/* ── Skeleton SVG Overlay ──────────────────────────────────────── */}
       <SkeletonOverlay
-        keypoints={keypoints as any[]}
+        keypoints={keypoints}
         postureScore={formAccuracy}
         width={width}
         height={height}
@@ -295,7 +303,7 @@ export default function WorkoutScreen() {
                   {badgeLabel}
                 </Text>
               </View>
-              <Text style={styles.exerciseTitle}>{exercise.name}</Text>
+              <Text style={styles.exerciseTitle}>{exercise?.name || 'Workout'}</Text>
             </View>
 
             <TouchableOpacity style={styles.glassIconBtn} onPress={() => setIsPaused(p => !p)}>
@@ -439,7 +447,11 @@ export default function WorkoutScreen() {
 
             {/* Controls */}
             <View style={styles.controlsBar}>
-              <TouchableOpacity style={styles.controlAction} onPress={() => { setReps(0); setTime(0); }}>
+              <TouchableOpacity style={styles.controlAction} onPress={() => { 
+                  setReps(0); 
+                  setTime(0); 
+                  exerciseStateRef.current.reps = 0; 
+              }}>
                 <View style={styles.controlIconCircle}>
                   <MaterialIcons name="restart-alt" size={24} color="#FFF" />
                 </View>

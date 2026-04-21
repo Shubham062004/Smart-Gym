@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useWorkout } from '../../src/hooks/useWorkout';
 import { useRouter } from 'expo-router';
@@ -9,7 +10,7 @@ export default function History() {
   const router = useRouter();
 
   return (
-    <SafeAreaView className="flex-1 bg-black">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
       {/* Header */}
       <View className="flex-row items-center justify-between p-6 bg-black border-b border-white/5">
         <TouchableOpacity 

@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../../src/store/authStore';
 import { useWorkout } from '../../src/hooks/useWorkout';
 import { useDashboard } from '../../src/hooks/useDashboard';
+import { EXERCISES, findExerciseIdByName } from '../../src/features/workout/config/exerciseConfig';
 
 export default function Homepage() {
   const router = useRouter();
@@ -13,10 +15,18 @@ export default function Homepage() {
   const { todayWorkout, isLoadingToday, startWorkout } = useWorkout();
   const { summary, quickWorkouts, isLoadingSummary } = useDashboard();
 
-  const handleStartWorkout = async (workoutId: string) => {
+  const handleStartWorkout = async (workout: any) => {
     try {
-      await startWorkout(workoutId);
-      router.push('/workout-screen' as any);
+      if (workout._id || (workout.id && workout.id.length > 10)) {
+        await startWorkout(workout.id || workout._id);
+      }
+      
+      const exerciseParam = findExerciseIdByName(workout.name || workout.id);
+
+      router.push({
+        pathname: '/workout-screen',
+        params: { exercise: exerciseParam }
+      } as any);
     } catch (e) {
       console.warn("Could not start workout", e);
     }
@@ -31,7 +41,7 @@ export default function Homepage() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
+    <SafeAreaView style={{ flex: 1 }}>
       <ScrollView className="flex-1 pb-6">
         {/* Header Section */}
         <View className="flex-row items-center justify-between p-6 pt-4">
@@ -57,7 +67,7 @@ export default function Homepage() {
         {/* Today's Summary */}
         <View className="px-6 mb-8">
           <View className="flex-row items-center gap-2 mb-4">
-            <Text className="text-lg font-bold text-slate-900 dark:text-white">Today's Summary</Text>
+            <Text className="text-lg font-bold text-slate-900 dark:text-white">Today&apos;s Summary</Text>
             <View className="bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                 <Text className="text-xs font-normal text-slate-500">
                     {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -123,14 +133,14 @@ export default function Homepage() {
             </TouchableOpacity>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 24, gap: 16 }}>
-            {Array.isArray(quickWorkouts) && quickWorkouts.map((workout: any) => (
+            {EXERCISES.slice(0, 5).map((workout) => (
               <TouchableOpacity 
-                key={workout.id || workout._id} 
+                key={workout.id} 
                 className="w-40 bg-white dark:bg-slate-800 rounded-2xl p-2 border border-slate-200 dark:border-slate-700 shadow-sm"
-                onPress={() => handleStartWorkout(workout.id || workout._id)}
+                onPress={() => handleStartWorkout(workout)}
               >
                 <View className="h-28 w-full bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden relative">
-                  <Image source={{ uri: workout.image || 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=500' }} className="w-full h-full absolute" />
+                  <Image source={{ uri: workout.image }} className="w-full h-full absolute" />
                   <LinearGradient colors={['transparent', 'rgba(0,0,0,0.8)']} className="absolute inset-0 justify-end p-2">
                      <View className="w-8 h-8 bg-primary rounded-full items-center justify-center">
                         <MaterialIcons name="play-arrow" size={20} color="black" />
@@ -140,9 +150,9 @@ export default function Homepage() {
                 <View className="p-2">
                   <Text className="font-bold text-sm text-slate-900 dark:text-white mb-1" numberOfLines={1}>{workout.name}</Text>
                   <View className="flex-row items-center gap-1">
-                    <Text className="text-[10px] font-bold text-slate-400 uppercase">{workout.difficulty || 'Beginner'}</Text>
+                    <Text className="text-[10px] font-bold text-slate-400 uppercase">{workout.difficulty}</Text>
                     <Text className="text-[10px] text-slate-400">•</Text>
-                    <Text className="text-[10px] font-bold text-slate-400 uppercase">{workout.duration || 5} MIN</Text>
+                    <Text className="text-[10px] font-bold text-slate-400 uppercase">{workout.duration} MIN</Text>
                   </View>
                 </View>
               </TouchableOpacity>

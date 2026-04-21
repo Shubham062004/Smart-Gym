@@ -131,7 +131,7 @@ export default function VerifyOtpScreen() {
                     </TouchableOpacity>
 
                     <View style={styles.resendContainer}>
-                        <Text style={styles.resendText}>Didn't receive the code? </Text>
+                        <Text style={styles.resendText}>Didn&apos;t receive the code? </Text>
                         <TouchableOpacity onPress={handleResend} disabled={countdown > 0}>
                             <Text style={[styles.resendLink, countdown > 0 && styles.resendLinkDisabled]}>
                                 {countdown > 0 ? `Resend Code (${countdown}s)` : "Resend Code"}

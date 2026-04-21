@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView, ImageBackground, TouchableOpacity, SafeAreaView, Switch, Alert } from 'react-native';
+import { View, Text, ScrollView, ImageBackground, TouchableOpacity, Switch, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../src/hooks/useAuth';
@@ -9,7 +10,7 @@ import { useUserStore } from '../src/store/userStore';
 
 export default function Settings() {
   const router = useRouter();
-  const { logout, isLoggingOut } = useAuth();
+  const { logout } = useAuth();
   const { deleteAccount, updateSettings } = useProfile();
   const { user } = useAuthStore();
   const { preferences, updatePreferences } = useUserStore();
@@ -51,7 +52,7 @@ export default function Settings() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
+    <SafeAreaView style={{ flex: 1 }}>
       {/* Header */}
       <View className="flex-row items-center px-4 py-4 bg-gray-50/80 dark:bg-slate-900/80 z-10 sticky top-0">
         <TouchableOpacity 
@@ -144,10 +145,10 @@ export default function Settings() {
         <View className="mb-10 gap-2">
           <Text className="text-sm font-semibold text-red-500 uppercase tracking-wider px-2">Danger Zone</Text>
           <View className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-red-500/20">
-            <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700" onPress={handleLogout} disabled={isLoggingOut}>
+            <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700" onPress={handleLogout}>
               <View className="flex-row items-center gap-3">
                 <MaterialIcons name="logout" size={24} color="#ef4444" />
-                <Text className="text-red-500 font-medium">{isLoggingOut ? 'Logging Out...' : 'Log Out'}</Text>
+                <Text className="text-red-500 font-medium">Log Out</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity className="flex-row items-center justify-between p-4" onPress={handleDeleteAccount}>

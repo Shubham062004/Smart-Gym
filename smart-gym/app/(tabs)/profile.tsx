@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView, ImageBackground, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, ImageBackground, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/store/authStore';
@@ -11,7 +12,7 @@ export default function Profile() {
   const { summary } = useDashboard();
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
+    <SafeAreaView style={{ flex: 1 }}>
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4 bg-gray-50/80 dark:bg-slate-900/80 z-50">
         <TouchableOpacity className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
