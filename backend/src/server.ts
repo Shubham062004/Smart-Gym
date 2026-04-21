@@ -22,8 +22,13 @@ const app: Express = express();
 connectDB();
 
 // Middleware
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    credentials: true
+}));
 app.use(helmet());
-app.use(cors());
 app.use(express.json());
 
 // Request Logger
