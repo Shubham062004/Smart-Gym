@@ -83,7 +83,7 @@ export default function ResetPasswordScreen() {
                 <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                     <MaterialIcons name="arrow-back" size={24} color="#f1f5f9" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>OnlyFitness</Text>
+                <Text style={styles.headerTitle}>AstraFit</Text>
             </View>
 
             <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>

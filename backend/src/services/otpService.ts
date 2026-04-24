@@ -8,7 +8,7 @@ export const sendOtpEmail = async (email: string, otp: string): Promise<void> =>
     const mailOptions = {
         from: process.env.EMAIL_USER || 'noreply@smartgym.com',
         to: email,
-        subject: 'OnlyFitness Password Reset',
+        subject: 'AstraFit Password Reset',
         text: `Your OTP code is ${otp}.\n\nThis code will expire in 10 minutes.`,
     };
 

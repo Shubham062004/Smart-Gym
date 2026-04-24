@@ -67,7 +67,7 @@ export default function Homepage() {
         {/* Today's Summary */}
         <View className="px-6 mb-8">
           <View className="flex-row items-center gap-2 mb-4">
-            <Text className="text-lg font-bold text-slate-900 dark:text-white">Today&apos;s Summary</Text>
+            <Text className="text-lg font-bold text-slate-900 dark:text-white">Today's Summary</Text>
             <View className="bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                 <Text className="text-xs font-normal text-slate-500">
                     {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -79,7 +79,11 @@ export default function Homepage() {
             {/* Main Stat Card */}
             <View className="bg-primary rounded-xl p-5 shadow-lg relative overflow-hidden shadow-primary/20">
               <View className="absolute top-0 right-0 p-3 opacity-10">
-                <MaterialIcons name="fitness-center" size={100} color="black" />
+                <Image 
+                    source={require('../../assets/images/icon.png')} 
+                    style={{ width: 100, height: 100 }} 
+                    resizeMode="contain"
+                />
               </View>
               <View className="relative z-10">
                 <Text className="text-black/60 font-medium mb-1 uppercase tracking-widest text-[10px]">Total Reps</Text>

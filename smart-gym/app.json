@@ -1,24 +1,24 @@
 {
   "expo": {
-    "name": "smart-gym",
+    "name": "AstraFit",
     "slug": "smart-gym",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "smartgym",
+    "scheme": "astrafit",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.shubh.smartgym",
+      "bundleIdentifier": "com.shubh.astrafit",
       "infoPlist": {
-        "NSCameraUsageDescription": "OnlyFitness needs access to your camera to track your workout form."
+        "NSCameraUsageDescription": "AstraFit needs access to your camera to track your workout form."
       }
     },
     "android": {
-      "package": "com.shubh.smartgym",
+      "package": "com.shubh.astrafit",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"

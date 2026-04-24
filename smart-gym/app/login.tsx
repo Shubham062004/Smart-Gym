@@ -12,6 +12,7 @@ import {
     Platform,
     ScrollView,
     Dimensions,
+    Image,
     ImageBackground,
     Alert,
 } from 'react-native';
@@ -118,9 +119,13 @@ export default function LoginScreen() {
 
                         <View style={styles.headerContainer}>
                             <View style={styles.logoBox}>
-                                <MaterialIcons name="fitness-center" size={48} color="#ffffff" />
+                                <Image 
+                                    source={require('../assets/images/icon.png')} 
+                                    style={{ width: 60, height: 60 }} 
+                                    resizeMode="contain"
+                                />
                             </View>
-                            <Text style={styles.mainTitle}>OnlyFitness</Text>
+                            <Text style={styles.mainTitle}>AstraFit</Text>
                             <Text style={styles.subTitle}>Your personal AI trainer</Text>
                         </View>
 

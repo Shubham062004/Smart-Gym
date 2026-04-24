@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { aiService } from '../../src/services/aiService';
@@ -15,7 +15,7 @@ interface Message {
 export default function AIChatbotScreen() {
     const { user } = useAuthStore();
     const [messages, setMessages] = useState<Message[]>([
-        { id: '1', role: 'ai', content: "Hello! I'm your OnlyFitness AI Coach. How can I help you reach your goals today?" }
+        { id: '1', role: 'ai', content: "Hello! I'm your AstraFit AI Coach. How can I help you reach your goals today?" }
     ]);
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -111,8 +111,12 @@ export default function AIChatbotScreen() {
     const renderMessage = ({ item }: { item: Message }) => (
         <View className={`flex-row mb-6 ${item.role === 'user' ? 'justify-end' : 'items-start'}`}>
             {item.role === 'ai' && (
-                <View className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-2 mt-1">
-                    <MaterialIcons name="smart-toy" size={16} color="black" />
+                <View className="w-8 h-8 rounded-full bg-white flex items-center justify-center mr-2 mt-1 overflow-hidden">
+                    <Image 
+                        source={require('../../assets/images/icon.png')} 
+                        style={{ width: 20, height: 20 }} 
+                        resizeMode="contain"
+                    />
                 </View>
             )}
             <View className={`px-4 py-3 rounded-2xl max-w-[85%] ${
@@ -160,8 +164,12 @@ export default function AIChatbotScreen() {
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
             >
                 <View className="flex-row items-center px-6 py-4 bg-black border-b border-white/5">
-                    <View className="w-10 h-10 rounded-full bg-primary/20 items-center justify-center border border-primary/30">
-                        <MaterialIcons name="smart-toy" size={20} color="#0df20d" />
+                    <View className="w-10 h-10 rounded-full bg-white items-center justify-center border border-white/10 overflow-hidden">
+                        <Image 
+                            source={require('../../assets/images/icon.png')} 
+                            style={{ width: 24, height: 24 }} 
+                            resizeMode="contain"
+                        />
                     </View>
                     <View className="ml-3">
                         <Text className="text-base font-bold text-white tracking-tight">AI Coach</Text>

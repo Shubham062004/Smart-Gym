@@ -19,7 +19,7 @@ const sendEmail = async (options: EmailOptions): Promise<void> => {
 
     // Configure the email options
     const mailOptions = {
-        from: `OnlyFitness <${process.env.EMAIL_USER}>`,
+        from: `AstraFit <${process.env.EMAIL_USER}>`,
         to: options.email,
         subject: options.subject,
         text: options.message,

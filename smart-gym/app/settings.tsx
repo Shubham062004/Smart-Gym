@@ -162,7 +162,7 @@ export default function Settings() {
 
         {/* Footer */}
         <View className="items-center mb-10">
-          <Text className="text-slate-400 text-sm">AI Fit Coach © 2024</Text>
+          <Text className="text-slate-400 text-sm">AstraFit © 2026</Text>
           <Text className="mt-1 font-medium text-slate-400 text-sm">Version 2.4.0</Text>
         </View>
       </ScrollView>

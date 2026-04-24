@@ -66,7 +66,7 @@ app.get('/api/workout-history', protect as any, (req: any, res: any) => res.stat
 
 // Root route
 app.get('/', (req: Request, res: Response) => {
-    res.status(200).json({ success: true, message: 'OnlyFitness API is running' });
+    res.status(200).json({ success: true, message: 'AstraFit API is running' });
 });
 
 // Error Handling Middleware

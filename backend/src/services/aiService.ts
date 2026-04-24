@@ -4,7 +4,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
 export const generateChatResponse = async (message: string) => {
-  const prompt = `You are an AI Fitness Coach for OnlyFitness. Respond to the user's message: "${message}". 
+  const prompt = `You are an AI Fitness Coach for AstraFit. Respond to the user's message: "${message}". 
   If they ask for a workout plan, return it in a structured JSON format like this:
   {
     "type": "workout_plan",

@@ -1,6 +1,4 @@
-<div align="center">
-
-# 🏋️ Smart-Gym
+# 🏋️ AstraFit
 
 ### AI-Powered Personal Trainer — Your Camera is Your Coach
 
@@ -11,7 +9,7 @@
 [![TensorFlow](https://img.shields.io/badge/TensorFlow.js-MoveNet-orange?logo=tensorflow)](https://www.tensorflow.org/js)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-Smart-Gym turns your smartphone camera into a real-time personal trainer — detecting full-body pose, validating exercise form, counting reps, and tracking your fitness journey. No wearables. No gym equipment. Just your phone.
+AstraFit turns your smartphone camera into a real-time personal trainer — detecting full-body pose, validating exercise form, counting reps, and tracking your fitness journey. No wearables. No gym equipment. Just your phone.
 
 </div>
 
@@ -38,8 +36,8 @@ Smart-Gym turns your smartphone camera into a real-time personal trainer — det
 ## 🏗️ Architecture
 
 ```
-Smart-Gym/
-├── smart-gym/               ← React Native / Expo frontend
+AstraFit/
+├── astra-fit/               ← React Native / Expo frontend
 │   ├── app/                 ← Expo Router screens
 │   │   ├── (tabs)/          ← Tab screens (Home, Workouts, Progress, Diet, AI, Profile)
 │   │   ├── workout-screen.tsx   ← Live AI workout tracker
@@ -153,8 +151,8 @@ Running TFjs inside a WebView (browser JS context) gives us:
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/Shubham062004/Smart-Gym.git
-cd Smart-Gym
+git clone https://github.com/Shubham062004/AstraFit.git
+cd AstraFit
 ```
 
 ### 2. Backend setup
@@ -172,7 +170,7 @@ npm run dev
 
 ### 3. Frontend setup
 ```bash
-cd smart-gym
+cd astra-fit
 npm install --legacy-peer-deps
 npx expo start -c
 ```
@@ -186,7 +184,7 @@ Scan the QR code with **Expo Go** on your phone.
 ### Backend — `backend/.env`
 ```env
 PORT=5000
-MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/smart-gym
+MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/astra-fit
 JWT_SECRET=your_super_secret_key
 
 # Optional — Google OAuth
@@ -244,7 +242,60 @@ Base URL: `http://localhost:5000/api`
 Onboarding (1→2→3)
        ↓
   Login / Signup
-   ↓         ↓
+    ↓         ↓
+Forgot     Google
+Password    OAuth
+       ↓
+    Home (Dashboard)
+    ├── Workouts Tab
+    │    └── Workout Screen ← AI Pose Detection Live
+    ├── Progress Tab
+    ├── Diet Plan Tab
+    ├── AI Chatbot Tab
+    └── Profile Tab
+         └── Settings / Edit Profile
+```
+
+---
+
+## 📁 Key Source Files
+
+| File | Role |
+|---|---|
+| `astra-fit/app/workout-screen.tsx` | Core workout AI screen |
+| `astra-fit/src/components/PoseDetectionView.jsx` | WebView ML engine |
+| `astra-fit/src/components/SkeletonOverlay.jsx` | SVG skeleton renderer |
+| `astra-fit/src/ml/postureAnalyzer.js` | Joint angle + posture scoring |
+| `astra-fit/src/ml/poseDetector.js` | MoveNet model loader |
+| `backend/src/controllers/authController.ts` | Auth logic |
+| `backend/src/models/User.ts` | User mongoose schema |
+| `backend/src/server.ts` | Express app entry point |
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feat/your-feature`
+3. Commit changes: `git commit -m 'feat: add your feature'`
+4. Push to branch: `git push origin feat/your-feature`
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+Built with ❤️ by [Shubham](https://github.com/Shubham062004)
+
+⭐ Star this repo if you found it useful!
+
+</div>       ↓
 Forgot     Google
 Password    OAuth
        ↓
@@ -264,11 +315,11 @@ Password    OAuth
 
 | File | Role |
 |---|---|
-| `smart-gym/app/workout-screen.tsx` | Core workout AI screen |
-| `smart-gym/src/components/PoseDetectionView.jsx` | WebView ML engine |
-| `smart-gym/src/components/SkeletonOverlay.jsx` | SVG skeleton renderer |
-| `smart-gym/src/ml/postureAnalyzer.js` | Joint angle + posture scoring |
-| `smart-gym/src/ml/poseDetector.js` | MoveNet model loader |
+| `astra-fit/app/workout-screen.tsx` | Core workout AI screen |
+| `astra-fit/src/components/PoseDetectionView.jsx` | WebView ML engine |
+| `astra-fit/src/components/SkeletonOverlay.jsx` | SVG skeleton renderer |
+| `astra-fit/src/ml/postureAnalyzer.js` | Joint angle + posture scoring |
+| `astra-fit/src/ml/poseDetector.js` | MoveNet model loader |
 | `backend/src/controllers/authController.ts` | Auth logic |
 | `backend/src/models/User.ts` | User mongoose schema |
 | `backend/src/server.ts` | Express app entry point |
