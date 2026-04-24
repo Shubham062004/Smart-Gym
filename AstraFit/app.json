@@ -12,7 +12,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.shubh.astrafit",
       "infoPlist": {
-        "NSCameraUsageDescription": "AstraFit needs access to your camera to track your workout form."
+        "NSCameraUsageDescription": "AstraFit needs access to your camera to track your workout form.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
