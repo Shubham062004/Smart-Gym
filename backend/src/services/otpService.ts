@@ -6,7 +6,7 @@ export const generateOtp = (): string => {
 
 export const sendOtpEmail = async (email: string, otp: string): Promise<void> => {
     const mailOptions = {
-        from: process.env.EMAIL_USER || 'noreply@smartgym.com',
+        from: process.env.EMAIL_USER || 'noreply@astrafit.com',
         to: email,
         subject: 'AstraFit Password Reset',
         text: `Your OTP code is ${otp}.\n\nThis code will expire in 10 minutes.`,
